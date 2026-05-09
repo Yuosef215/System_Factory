@@ -7,6 +7,7 @@ import globalErrorHandler from "./src/Middlewares/errorMiddleware.js";
 import ballBearingRoute from "./src/Routes/Mechanical/ballBearingRoute.js";
 import usersRoute from "./src/Routes/users/usersRoute.js";
 import rollRoute from "./src/Routes/Mechanical/rollRoute.js";
+import contactorRoute from "./src/Routes/Electric/contactorRoute.js";
 import cors from "cors";
 
 const app = express();
@@ -29,6 +30,7 @@ app.get("/", (req, res) => {
 app.use("/api/v1/ball-bearing", ballBearingRoute);
 app.use("/api/v1/users", usersRoute);
 app.use("/api/v1/rolls", rollRoute);
+app.use("/api/v1/contactors", contactorRoute);
 
 // Global Error Handler
 app.use(globalErrorHandler);

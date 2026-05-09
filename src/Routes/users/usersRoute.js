@@ -12,7 +12,7 @@ import {
 
 const router = express.Router();
 
-router.route('/createUser').post(allowedTo('developer', 'ceo', 'gm'), createUserValidator, createUser);
+router.route('/createUser').post(createUserValidator, createUser);
 router.route('/login').post(loginValidator, loginUser);
 
 export default router;

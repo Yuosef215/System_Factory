@@ -13,6 +13,7 @@ export default function IronFactoryLogin() {
     console.log(data)
     try {
       const response = await axios.post('http://localhost:5000/api/v1/users/login', data);
+      
           console.log(response.data);
 
       localStorage.setItem('token', response.data.token);
