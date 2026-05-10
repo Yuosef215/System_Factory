@@ -1,28 +1,22 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  ArrowRight, Plus, Minus, PackagePlus, History,
-  Search, X, Loader2, ChevronDown, ChevronUp,
-  Pencil, Trash2, AlertTriangle, Calendar, Filter,
-  TrendingDown, TrendingUp, Package, RefreshCw
+  ArrowRight, Plus, TrendingDown, TrendingUp,
+  History, Search, X, Loader2, ChevronUp,
+  Pencil, Trash2, AlertTriangle, Calendar,
+  Filter, Package, RefreshCw, Zap
 } from "lucide-react";
 import api from "../api/axios";
 
 // ─────────────────────────────────────────────────────────────────
-// Utility helpers
+// Helpers
 // ─────────────────────────────────────────────────────────────────
-const REASON_LABELS = {
-  production: "إنتاج",
-  maintenance: "صيانة",
-  purchase: "شراء",
-};
-
 function StockBadge({ stock }) {
   if (stock === 0)
-    return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-500/15 text-red-400 border border-red-500/25">نفد</span>;
+    return <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-500/15 text-red-400 border border-red-500/25">نفد</span>;
   if (stock < 5)
-    return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/25">منخفض</span>;
-  return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/25">متاح</span>;
+    return <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/25">منخفض</span>;
+  return <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400 border border-emerald-500/25">متاح</span>;
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -51,7 +45,7 @@ function Modal({ title, subtitle, onClose, children, width = "max-w-md" }) {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// Input component
+// Field + Input styles
 // ─────────────────────────────────────────────────────────────────
 function Field({ label, error, children }) {
   return (
@@ -63,18 +57,24 @@ function Field({ label, error, children }) {
   );
 }
 
-const inputClass =
-  "w-full bg-zinc-900 border border-zinc-700/80 focus:border-orange-500/70 focus:ring-1 focus:ring-orange-500/20 outline-none rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-zinc-600 transition-all duration-200";
+const inputCls =
+  "w-full bg-zinc-900 border border-zinc-700/80 focus:border-yellow-500/70 focus:ring-1 focus:ring-yellow-500/20 outline-none rounded-xl px-4 py-2.5 text-white text-sm placeholder:text-zinc-600 transition-all duration-200";
 
-const selectClass =
-  "w-full bg-zinc-900 border border-zinc-700/80 focus:border-orange-500/70 focus:ring-1 focus:ring-orange-500/20 outline-none rounded-xl px-4 py-2.5 text-white text-sm transition-all duration-200 appearance-none";
+function ServerError({ msg }) {
+  if (!msg) return null;
+  return (
+    <div className="flex items-center gap-2 text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2.5">
+      <AlertTriangle size={15} className="shrink-0" /> {msg}
+    </div>
+  );
+}
 
 // ─────────────────────────────────────────────────────────────────
-// Add Bearing Modal
+// Add Contactor Modal
 // ─────────────────────────────────────────────────────────────────
-function AddBearingModal({ onClose, onSuccess }) {
+function AddContactorModal({ onClose, onSuccess }) {
   const [form, setForm] = useState({
-    brandtype: "", code: "", innerdiameter: "", outerdiameter: "", width: "", stock: "",
+    companyName: "", mass_kg: "", volt: "", not_asstant: "", stock: "",
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -87,12 +87,11 @@ function AddBearingModal({ onClose, onSuccess }) {
 
   const validate = () => {
     const e = {};
-    if (!form.brandtype.trim()) e.brandtype = "مطلوب";
-    if (!form.code.trim()) e.code = "مطلوب";
-    if (!form.innerdiameter.trim()) e.innerdiameter = "مطلوب";
-    if (!form.outerdiameter.trim()) e.outerdiameter = "مطلوب";
-    if (!form.width.trim()) e.width = "مطلوب";
-    if (!form.stock || Number(form.stock) < 0) e.stock = "يجب أن تكون الكمية 0 أو أكبر";
+    if (!form.companyName.trim()) e.companyName = "مطلوب";
+    if (!form.mass_kg || isNaN(form.mass_kg)) e.mass_kg = "رقم مطلوب";
+    if (!form.volt || isNaN(form.volt)) e.volt = "رقم مطلوب";
+    if (!form.not_asstant.trim()) e.not_asstant = "مطلوب";
+    if (form.stock === "" || isNaN(form.stock)) e.stock = "رقم مطلوب";
     return e;
   };
 
@@ -102,7 +101,13 @@ function AddBearingModal({ onClose, onSuccess }) {
     setServerError("");
     try {
       setLoading(true);
-      await api.post("/ball-bearing/create", { ...form, stock: Number(form.stock) });
+      await api.post("/contactors/createContactor", {
+        companyName: form.companyName,
+        mass_kg: Number(form.mass_kg),
+        volt: Number(form.volt),
+        not_asstant: form.not_asstant,
+        stock: Number(form.stock),
+      });
       onSuccess();
       onClose();
     } catch (err) {
@@ -113,41 +118,40 @@ function AddBearingModal({ onClose, onSuccess }) {
   };
 
   return (
-    <Modal title="إضافة بيرينج جديد" subtitle="أدخل بيانات البيرينج" onClose={onClose}>
+    <Modal title="إضافة كونتاكتور جديد" subtitle="أدخل بيانات الكونتاكتور" onClose={onClose}>
       <div className="space-y-3.5">
         <div className="grid grid-cols-2 gap-3">
-          <Field label="الماركة" error={errors.brandtype}>
-            <input name="brandtype" value={form.brandtype} onChange={handle} placeholder="SKF, FAG, ..." className={inputClass} />
+          <Field label="الشركة المصنعة" error={errors.companyName}>
+            <input name="companyName" value={form.companyName} onChange={handle}
+              placeholder="Siemens, Schneider..." className={inputCls} />
           </Field>
-          <Field label="الكود" error={errors.code}>
-            <input name="code" value={form.code} onChange={handle} placeholder="6205-2RS" className={inputClass} />
+          <Field label="not_asstant" error={errors.not_asstant}>
+            <input name="not_asstant" value={form.not_asstant} onChange={handle}
+              placeholder="NO / NC" className={inputCls} />
           </Field>
         </div>
-        <div className="grid grid-cols-3 gap-3">
-          <Field label="القطر الداخلي" error={errors.innerdiameter}>
-            <input name="innerdiameter" value={form.innerdiameter} onChange={handle} placeholder="25mm" className={inputClass} />
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="الوزن (kg)" error={errors.mass_kg}>
+            <input name="mass_kg" type="number" value={form.mass_kg} onChange={handle}
+              placeholder="0.5" className={inputCls} />
           </Field>
-          <Field label="القطر الخارجي" error={errors.outerdiameter}>
-            <input name="outerdiameter" value={form.outerdiameter} onChange={handle} placeholder="52mm" className={inputClass} />
-          </Field>
-          <Field label="العرض" error={errors.width}>
-            <input name="width" value={form.width} onChange={handle} placeholder="15mm" className={inputClass} />
+          <Field label="الفولت" error={errors.volt}>
+            <input name="volt" type="number" value={form.volt} onChange={handle}
+              placeholder="220" className={inputCls} />
           </Field>
         </div>
         <Field label="الكمية الأولية" error={errors.stock}>
-          <input name="stock" type="number" min="0" value={form.stock} onChange={handle} placeholder="0" className={inputClass} />
+          <input name="stock" type="number" min="0" value={form.stock} onChange={handle}
+            placeholder="0" className={inputCls} />
         </Field>
-        {serverError && (
-          <div className="flex items-center gap-2 text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2.5">
-            <AlertTriangle size={15} className="shrink-0" /> {serverError}
-          </div>
-        )}
+        <ServerError msg={serverError} />
         <div className="flex gap-3 pt-1">
-          <button onClick={onClose} className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-medium py-2.5 rounded-xl text-sm transition">
+          <button onClick={onClose}
+            className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-medium py-2.5 rounded-xl text-sm transition">
             إلغاء
           </button>
           <button onClick={submit} disabled={loading}
-            className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-2">
+            className="flex-1 bg-yellow-500 hover:bg-yellow-600 disabled:opacity-60 text-black font-semibold py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-2">
             {loading ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />} حفظ
           </button>
         </div>
@@ -157,15 +161,14 @@ function AddBearingModal({ onClose, onSuccess }) {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// Edit Bearing Modal
+// Edit Contactor Modal
 // ─────────────────────────────────────────────────────────────────
-function EditBearingModal({ bearing, onClose, onSuccess }) {
+function EditContactorModal({ contactor, onClose, onSuccess }) {
   const [form, setForm] = useState({
-    brandtype: bearing.brandtype,
-    code: bearing.code,
-    innerdiameter: bearing.innerdiameter,
-    outerdiameter: bearing.outerdiameter,
-    width: bearing.width,
+    companyName: contactor.companyName,
+    mass_kg: contactor.mass_kg,
+    volt: contactor.volt,
+    not_asstant: contactor.not_asstant,
   });
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState("");
@@ -176,8 +179,13 @@ function EditBearingModal({ bearing, onClose, onSuccess }) {
     setServerError("");
     try {
       setLoading(true);
-      // PUT /:id — update fields (stock لا يُعدَّل من هنا)
-      await api.put(`/ball-bearing/${bearing._id}`, form);
+      await api.put(`/contactors/${contactor._id}`, {
+        companyName: form.companyName,
+        mass_kg: Number(form.mass_kg),
+        volt: Number(form.volt),
+        not_asstant: form.not_asstant,
+        stock: contactor.stock,
+      });
       onSuccess();
       onClose();
     } catch (err) {
@@ -188,34 +196,30 @@ function EditBearingModal({ bearing, onClose, onSuccess }) {
   };
 
   return (
-    <Modal title="تعديل البيرينج" subtitle={`كود: ${bearing.code}`} onClose={onClose}>
+    <Modal title="تعديل الكونتاكتور" subtitle={`${contactor.companyName} — ${contactor.volt}V`} onClose={onClose}>
       <div className="space-y-3.5">
         <div className="grid grid-cols-2 gap-3">
-          <Field label="الماركة">
-            <input name="brandtype" value={form.brandtype} onChange={handle} className={inputClass} />
+          <Field label="الشركة المصنعة">
+            <input name="companyName" value={form.companyName} onChange={handle} className={inputCls} />
           </Field>
-          <Field label="الكود">
-            <input name="code" value={form.code} onChange={handle} className={inputClass} />
-          </Field>
-        </div>
-        <div className="grid grid-cols-3 gap-3">
-          <Field label="القطر الداخلي">
-            <input name="innerdiameter" value={form.innerdiameter} onChange={handle} className={inputClass} />
-          </Field>
-          <Field label="القطر الخارجي">
-            <input name="outerdiameter" value={form.outerdiameter} onChange={handle} className={inputClass} />
-          </Field>
-          <Field label="العرض">
-            <input name="width" value={form.width} onChange={handle} className={inputClass} />
+          <Field label="not_asstant">
+            <input name="not_asstant" value={form.not_asstant} onChange={handle} className={inputCls} />
           </Field>
         </div>
-        {serverError && (
-          <div className="flex items-center gap-2 text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2.5">
-            <AlertTriangle size={15} /> {serverError}
-          </div>
-        )}
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="الوزن (kg)">
+            <input name="mass_kg" type="number" value={form.mass_kg} onChange={handle} className={inputCls} />
+          </Field>
+          <Field label="الفولت">
+            <input name="volt" type="number" value={form.volt} onChange={handle} className={inputCls} />
+          </Field>
+        </div>
+        <ServerError msg={serverError} />
         <div className="flex gap-3 pt-1">
-          <button onClick={onClose} className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-medium py-2.5 rounded-xl text-sm transition">إلغاء</button>
+          <button onClick={onClose}
+            className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-medium py-2.5 rounded-xl text-sm transition">
+            إلغاء
+          </button>
           <button onClick={submit} disabled={loading}
             className="flex-1 bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-2">
             {loading ? <Loader2 size={16} className="animate-spin" /> : <Pencil size={16} />} حفظ التعديلات
@@ -229,19 +233,23 @@ function EditBearingModal({ bearing, onClose, onSuccess }) {
 // ─────────────────────────────────────────────────────────────────
 // Dispense Modal
 // ─────────────────────────────────────────────────────────────────
-function DispenseModal({ bearing, onClose, onSuccess }) {
+function DispenseModal({ contactor, onClose, onSuccess }) {
   const [quantity, setQuantity] = useState(1);
-  const [reason, setReason] = useState("production");
+  const [reason, setReason] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const submit = async () => {
     setError("");
+    if (!reason.trim()) return setError("يرجى كتابة السبب");
     if (Number(quantity) < 1) return setError("الكمية يجب أن تكون 1 على الأقل");
-    if (Number(quantity) > bearing.stock) return setError(`الكمية أكبر من المتاح (${bearing.stock})`);
+    if (Number(quantity) > contactor.stock) return setError(`الكمية أكبر من المتاح (${contactor.stock})`);
     try {
       setLoading(true);
-      await api.patch(`/ball-bearing/dispense/${bearing._id}`, { quantity: Number(quantity), reason });
+      await api.patch(`/contactors/dispense/${contactor._id}`, {
+        quantity: Number(quantity),
+        reason,
+      });
       onSuccess();
       onClose();
     } catch (err) {
@@ -252,38 +260,32 @@ function DispenseModal({ bearing, onClose, onSuccess }) {
   };
 
   return (
-    <Modal title="صرف من المخزون" subtitle={`${bearing.brandtype} — ${bearing.code}`} onClose={onClose}>
+    <Modal title="صرف من المخزون" subtitle={`${contactor.companyName} — ${contactor.volt}V`} onClose={onClose}>
       <div className="space-y-4">
         <div className="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3">
           <span className="text-sm text-zinc-400">المخزون الحالي</span>
-          <span className="text-lg font-bold text-white">{bearing.stock}</span>
+          <span className="text-lg font-bold text-white">{contactor.stock}</span>
         </div>
         <Field label="الكمية المطلوب صرفها">
-          <input type="number" min={1} max={bearing.stock} value={quantity}
-            onChange={(e) => setQuantity(e.target.value)} className={inputClass} />
+          <input type="number" min={1} max={contactor.stock} value={quantity}
+            onChange={(e) => setQuantity(e.target.value)} className={inputCls} />
         </Field>
         <Field label="سبب الصرف">
-          <div className="relative">
-            <select value={reason} onChange={(e) => setReason(e.target.value)} className={selectClass}>
-              <option value="production">إنتاج</option>
-              <option value="maintenance">صيانة</option>
-            </select>
-            <ChevronDown size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" />
-          </div>
+          <input type="text" value={reason} onChange={(e) => setReason(e.target.value)}
+            placeholder="مثال: صيانة لوحة كهربائية" className={inputCls} />
         </Field>
-        {error && (
-          <div className="flex items-center gap-2 text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2.5">
-            <AlertTriangle size={15} /> {error}
-          </div>
-        )}
-        {Number(quantity) > 0 && Number(quantity) <= bearing.stock && (
+        {Number(quantity) > 0 && Number(quantity) <= contactor.stock && (
           <div className="text-xs text-zinc-500 bg-zinc-900 rounded-xl px-4 py-2.5 flex justify-between">
             <span>الرصيد بعد الصرف</span>
-            <span className="text-amber-400 font-semibold">{bearing.stock - Number(quantity)}</span>
+            <span className="text-amber-400 font-semibold">{contactor.stock - Number(quantity)}</span>
           </div>
         )}
+        <ServerError msg={error} />
         <div className="flex gap-3 pt-1">
-          <button onClick={onClose} className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-medium py-2.5 rounded-xl text-sm transition">إلغاء</button>
+          <button onClick={onClose}
+            className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-medium py-2.5 rounded-xl text-sm transition">
+            إلغاء
+          </button>
           <button onClick={submit} disabled={loading}
             className="flex-1 bg-red-500 hover:bg-red-600 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-2">
             {loading ? <Loader2 size={16} className="animate-spin" /> : <TrendingDown size={16} />} تأكيد الصرف
@@ -297,7 +299,7 @@ function DispenseModal({ bearing, onClose, onSuccess }) {
 // ─────────────────────────────────────────────────────────────────
 // Add Stock Modal
 // ─────────────────────────────────────────────────────────────────
-function AddStockModal({ bearing, onClose, onSuccess }) {
+function AddStockModal({ contactor, onClose, onSuccess }) {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -307,7 +309,7 @@ function AddStockModal({ bearing, onClose, onSuccess }) {
     if (Number(quantity) < 1) return setError("الكمية يجب أن تكون 1 على الأقل");
     try {
       setLoading(true);
-      await api.patch(`/ball-bearing/add-stock/${bearing._id}`, { quantity: Number(quantity), reason: "purchase" });
+      await api.patch(`/contactors/addStock/${contactor._id}`, { quantity: Number(quantity) });
       onSuccess();
       onClose();
     } catch (err) {
@@ -318,28 +320,28 @@ function AddStockModal({ bearing, onClose, onSuccess }) {
   };
 
   return (
-    <Modal title="إضافة للمخزون" subtitle={`${bearing.brandtype} — ${bearing.code}`} onClose={onClose}>
+    <Modal title="إضافة للمخزون" subtitle={`${contactor.companyName} — ${contactor.volt}V`} onClose={onClose}>
       <div className="space-y-4">
         <div className="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3">
           <span className="text-sm text-zinc-400">المخزون الحالي</span>
-          <span className="text-lg font-bold text-white">{bearing.stock}</span>
+          <span className="text-lg font-bold text-white">{contactor.stock}</span>
         </div>
         <Field label="الكمية المضافة">
-          <input type="number" min={1} value={quantity} onChange={(e) => setQuantity(e.target.value)} className={inputClass} />
+          <input type="number" min={1} value={quantity}
+            onChange={(e) => setQuantity(e.target.value)} className={inputCls} />
         </Field>
         {Number(quantity) > 0 && (
           <div className="text-xs text-zinc-500 bg-zinc-900 rounded-xl px-4 py-2.5 flex justify-between">
             <span>الرصيد بعد الإضافة</span>
-            <span className="text-emerald-400 font-semibold">{bearing.stock + Number(quantity)}</span>
+            <span className="text-emerald-400 font-semibold">{contactor.stock + Number(quantity)}</span>
           </div>
         )}
-        {error && (
-          <div className="flex items-center gap-2 text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2.5">
-            <AlertTriangle size={15} /> {error}
-          </div>
-        )}
+        <ServerError msg={error} />
         <div className="flex gap-3 pt-1">
-          <button onClick={onClose} className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-medium py-2.5 rounded-xl text-sm transition">إلغاء</button>
+          <button onClick={onClose}
+            className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-medium py-2.5 rounded-xl text-sm transition">
+            إلغاء
+          </button>
           <button onClick={submit} disabled={loading}
             className="flex-1 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-2">
             {loading ? <Loader2 size={16} className="animate-spin" /> : <TrendingUp size={16} />} تأكيد الإضافة
@@ -351,16 +353,16 @@ function AddStockModal({ bearing, onClose, onSuccess }) {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// Delete Confirm Modal
+// Delete Modal
 // ─────────────────────────────────────────────────────────────────
-function DeleteModal({ bearing, onClose, onSuccess }) {
+function DeleteModal({ contactor, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const submit = async () => {
     try {
       setLoading(true);
-      await api.delete(`/ball-bearing/${bearing._id}`);
+      await api.delete(`/contactors/${contactor._id}`);
       onSuccess();
       onClose();
     } catch (err) {
@@ -371,21 +373,24 @@ function DeleteModal({ bearing, onClose, onSuccess }) {
   };
 
   return (
-    <Modal title="حذف البيرينج" onClose={onClose}>
+    <Modal title="حذف الكونتاكتور" onClose={onClose}>
       <div className="space-y-4">
         <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/20 rounded-xl p-4">
           <AlertTriangle size={18} className="text-red-400 shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm text-red-300 font-semibold">تحذير: لا يمكن التراجع عن هذا الإجراء</p>
+            <p className="text-sm text-red-300 font-semibold">لا يمكن التراجع عن هذا الإجراء</p>
             <p className="text-xs text-red-400/80 mt-1">
-              هل أنت متأكد من حذف <strong className="text-white">{bearing.code}</strong>؟
-              <br />لن يتم الحذف إذا كانت هناك حركات مسجلة عليه.
+              هل أنت متأكد من حذف{" "}
+              <strong className="text-white">{contactor.companyName} — {contactor.volt}V</strong>؟
             </p>
           </div>
         </div>
-        {error && <p className="text-red-400 text-sm">{error}</p>}
+        <ServerError msg={error} />
         <div className="flex gap-3">
-          <button onClick={onClose} className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-medium py-2.5 rounded-xl text-sm transition">إلغاء</button>
+          <button onClick={onClose}
+            className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-medium py-2.5 rounded-xl text-sm transition">
+            إلغاء
+          </button>
           <button onClick={submit} disabled={loading}
             className="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-2">
             {loading ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />} حذف
@@ -397,18 +402,18 @@ function DeleteModal({ bearing, onClose, onSuccess }) {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// Movements Panel (per bearing)
+// Movements Panel (per contactor)
 // ─────────────────────────────────────────────────────────────────
-function MovementsPanel({ bearingId }) {
+function MovementsPanel({ contactorId }) {
   const [movements, setMovements] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get(`/ball-bearing/movements/${bearingId}`)
+    api.get(`/contactors/movements/${contactorId}`)
       .then((r) => setMovements(r.data.data))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [bearingId]);
+  }, [contactorId]);
 
   if (loading)
     return <div className="py-8 flex justify-center text-zinc-600"><Loader2 className="animate-spin" size={20} /></div>;
@@ -446,8 +451,8 @@ function MovementsPanel({ bearingId }) {
               <td className="py-2 px-3 font-bold text-white">{m.quantity}</td>
               <td className="py-2 px-3 text-zinc-400">{m.balanceBefore}</td>
               <td className="py-2 px-3 text-zinc-400">{m.balanceAfter}</td>
-              <td className="py-2 px-3 text-zinc-400">{REASON_LABELS[m.reason] || m.reason}</td>
-              <td className="py-2 px-3 text-zinc-500">{m.createdBy}</td>
+              <td className="py-2 px-3 text-zinc-400">{m.reason || "—"}</td>
+              <td className="py-2 px-3 text-zinc-500">{m.createdBy || "—"}</td>
             </tr>
           ))}
         </tbody>
@@ -457,76 +462,51 @@ function MovementsPanel({ bearingId }) {
 }
 
 // ─────────────────────────────────────────────────────────────────
-// All Movements Modal (by date)
+// All Movements Modal
 // ─────────────────────────────────────────────────────────────────
 function AllMovementsModal({ onClose }) {
-  const today = new Date().toISOString().split("T")[0];
-  const [date, setDate] = useState(today);
   const [movements, setMovements] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [fetched, setFetched] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const fetch = async () => {
-    if (!date) return;
-    setLoading(true);
-    setFetched(false);
-    try {
-      const res = await api.get(`/ball-bearing/movements?date=${date}`);
-      setMovements(res.data.data);
-    } catch {}
-    finally { setLoading(false); setFetched(true); }
-  };
-
-  useEffect(() => { fetch(); }, []);
+  useEffect(() => {
+    api.get("/contactors/allMovements")
+      .then((r) => setMovements(r.data.data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
-    <Modal title="سجل الحركات اليومي" subtitle="عرض كل حركات الصرف والإضافة" onClose={onClose} width="max-w-3xl">
+    <Modal title="كل حركات الكونتاكتورات" subtitle={`${movements.length} حركة إجمالي`} onClose={onClose} width="max-w-3xl">
       <div className="space-y-4">
-        <div className="flex gap-3 items-end">
-          <div className="flex-1">
-            <label className="text-xs font-medium text-zinc-400 mb-1.5 block">اختر التاريخ</label>
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)}
-              className={inputClass} style={{ colorScheme: "dark" }} />
-          </div>
-          <button onClick={fetch}
-            className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition">
-            <Filter size={15} /> عرض
-          </button>
-        </div>
-
-        {loading && <div className="py-12 flex justify-center text-zinc-600"><Loader2 className="animate-spin" size={22} /></div>}
-
-        {!loading && fetched && movements.length === 0 && (
-          <div className="text-center py-12 text-zinc-600">
-            <Package size={36} className="mx-auto mb-3 opacity-40" />
-            <p>لا توجد حركات في هذا اليوم</p>
+        {loading && (
+          <div className="py-12 flex justify-center text-zinc-600">
+            <Loader2 className="animate-spin" size={22} />
           </div>
         )}
-
+        {!loading && movements.length === 0 && (
+          <div className="text-center py-12 text-zinc-600">
+            <Package size={36} className="mx-auto mb-3 opacity-40" />
+            <p>لا توجد حركات مسجلة</p>
+          </div>
+        )}
         {!loading && movements.length > 0 && (
-          <div className="rounded-xl border border-zinc-800 overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-2.5 bg-zinc-900 border-b border-zinc-800">
-              <span className="text-xs text-zinc-400">{movements.length} حركة</span>
-            </div>
+          <div className="rounded-xl border border-zinc-800 overflow-hidden max-h-[60vh] overflow-y-auto">
             <table className="w-full text-xs">
-              <thead>
-                <tr className="border-b border-zinc-800 text-zinc-500 bg-zinc-900/50">
-                  <th className="text-right py-2.5 px-4 font-medium">البيرينج</th>
+              <thead className="sticky top-0 bg-zinc-900 border-b border-zinc-800">
+                <tr className="text-zinc-500">
+                  <th className="text-right py-2.5 px-4 font-medium">الكونتاكتور</th>
                   <th className="text-right py-2.5 px-4 font-medium">العملية</th>
                   <th className="text-right py-2.5 px-4 font-medium">الكمية</th>
                   <th className="text-right py-2.5 px-4 font-medium">قبل → بعد</th>
                   <th className="text-right py-2.5 px-4 font-medium">السبب</th>
                   <th className="text-right py-2.5 px-4 font-medium">بواسطة</th>
-                  <th className="text-right py-2.5 px-4 font-medium">الوقت</th>
+                  <th className="text-right py-2.5 px-4 font-medium">التاريخ</th>
                 </tr>
               </thead>
               <tbody>
                 {movements.map((m) => (
                   <tr key={m._id} className="border-b border-zinc-800/40 hover:bg-zinc-800/20 transition-colors">
-                    <td className="py-2.5 px-4">
-                      <div className="font-semibold text-white">{m.ballBearing?.code || "—"}</div>
-                      <div className="text-zinc-500">{m.ballBearing?.brandtype}</div>
-                    </td>
+                    <td className="py-2.5 px-4 text-zinc-300 font-medium">{m.contactor?.companyName || "—"}</td>
                     <td className="py-2.5 px-4">
                       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold
                         ${m.process === "صرف" ? "bg-red-500/15 text-red-400" : "bg-emerald-500/15 text-emerald-400"}`}>
@@ -536,9 +516,11 @@ function AllMovementsModal({ onClose }) {
                     </td>
                     <td className="py-2.5 px-4 font-bold text-white">{m.quantity}</td>
                     <td className="py-2.5 px-4 text-zinc-400">{m.balanceBefore} → {m.balanceAfter}</td>
-                    <td className="py-2.5 px-4 text-zinc-400">{REASON_LABELS[m.reason] || m.reason}</td>
-                    <td className="py-2.5 px-4 text-zinc-400">{m.createdBy}</td>
+                    <td className="py-2.5 px-4 text-zinc-400">{m.reason || "—"}</td>
+                    <td className="py-2.5 px-4 text-zinc-400">{m.createdBy || "—"}</td>
                     <td className="py-2.5 px-4 text-zinc-500">
+                      {new Date(m.createdAt).toLocaleDateString("ar-EG", { day: "2-digit", month: "short" })}
+                      {" — "}
                       {new Date(m.createdAt).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })}
                     </td>
                   </tr>
@@ -555,21 +537,21 @@ function AllMovementsModal({ onClose }) {
 // ─────────────────────────────────────────────────────────────────
 // Main Page
 // ─────────────────────────────────────────────────────────────────
-export default function BallBearings() {
+export default function Contactors() {
   const navigate = useNavigate();
-  const [bearings, setBearings] = useState([]);
+  const [contactors, setContactors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState(null);
   const [modal, setModal] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchBearings = useCallback(async (silent = false) => {
+  const fetchContactors = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
     else setRefreshing(true);
     try {
-      const res = await api.get("/ball-bearing/all_bearings");
-      setBearings(res.data.data);
+      const res = await api.get("/contactors/");
+      setContactors(res.data.data);
     } catch {}
     finally {
       setLoading(false);
@@ -577,19 +559,20 @@ export default function BallBearings() {
     }
   }, []);
 
-  useEffect(() => { fetchBearings(); }, []);
+  useEffect(() => { fetchContactors(); }, []);
 
-  const filtered = bearings.filter(
-    (b) =>
-      b.code?.toLowerCase().includes(search.toLowerCase()) ||
-      b.brandtype?.toLowerCase().includes(search.toLowerCase())
+  const filtered = contactors.filter(
+    (c) =>
+      c.companyName?.toLowerCase().includes(search.toLowerCase()) ||
+      String(c.volt).includes(search) ||
+      String(c.mass_kg).includes(search)
   );
 
   const stats = {
-    total: bearings.length,
-    outOfStock: bearings.filter((b) => b.stock === 0).length,
-    low: bearings.filter((b) => b.stock > 0 && b.stock < 5).length,
-    totalStock: bearings.reduce((s, b) => s + b.stock, 0),
+    total: contactors.length,
+    outOfStock: contactors.filter((c) => c.stock === 0).length,
+    low: contactors.filter((c) => c.stock > 0 && c.stock < 5).length,
+    totalStock: contactors.reduce((s, c) => s + c.stock, 0),
   };
 
   return (
@@ -598,26 +581,29 @@ export default function BallBearings() {
       {/* ── Top Bar ── */}
       <div className="sticky top-0 z-30 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800/60">
         <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-4">
-            <button onClick={() => navigate("/mechanical")}
+          <div className="flex items-center gap-3">
+            <button onClick={() => navigate("/electrical")}
               className="flex items-center gap-1.5 text-zinc-400 hover:text-white transition text-sm font-medium">
-              <ArrowRight size={16} /> الميكانيكا
+              <ArrowRight size={16} /> الكهرباء
             </button>
             <span className="text-zinc-700">/</span>
-            <span className="text-white font-semibold text-sm">البيرينجات</span>
+            <div className="flex items-center gap-2">
+              <Zap size={16} className="text-yellow-400" />
+              <span className="text-white font-semibold text-sm">الكونتاكتورات</span>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <button onClick={() => setModal({ type: "allMovements" })}
               className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white text-sm font-medium px-4 py-2 rounded-xl transition">
-              <Calendar size={15} /> سجل الحركات
+              <Calendar size={15} /> كل الحركات
             </button>
-            <button onClick={() => fetchBearings(true)} disabled={refreshing}
+            <button onClick={() => fetchContactors(true)} disabled={refreshing}
               className="p-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white rounded-xl transition">
               <RefreshCw size={16} className={refreshing ? "animate-spin" : ""} />
             </button>
             <button onClick={() => setModal({ type: "add" })}
-              className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition shadow-lg shadow-orange-500/20">
-              <Plus size={16} /> إضافة بيرينج
+              className="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-black text-sm font-semibold px-4 py-2 rounded-xl transition shadow-lg shadow-yellow-500/20">
+              <Plus size={16} /> إضافة كونتاكتور
             </button>
           </div>
         </div>
@@ -629,7 +615,7 @@ export default function BallBearings() {
         <div className="grid grid-cols-4 gap-4">
           {[
             { label: "إجمالي الأصناف", value: stats.total, color: "text-white", bg: "bg-zinc-800/50" },
-            { label: "إجمالي القطع", value: stats.totalStock, color: "text-blue-400", bg: "bg-blue-500/10 border border-blue-500/20" },
+            { label: "إجمالي القطع", value: stats.totalStock, color: "text-yellow-400", bg: "bg-yellow-500/10 border border-yellow-500/20" },
             { label: "مخزون منخفض", value: stats.low, color: "text-amber-400", bg: "bg-amber-500/10 border border-amber-500/20" },
             { label: "نفد المخزون", value: stats.outOfStock, color: "text-red-400", bg: "bg-red-500/10 border border-red-500/20" },
           ].map((s) => (
@@ -644,7 +630,7 @@ export default function BallBearings() {
         <div className="relative">
           <Search size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
           <input value={search} onChange={(e) => setSearch(e.target.value)}
-            placeholder="بحث بالكود أو الماركة..."
+            placeholder="بحث بالشركة أو الفولت أو الوزن..."
             className="w-full max-w-sm bg-zinc-900 border border-zinc-800 focus:border-zinc-600 outline-none rounded-xl px-4 py-2.5 pr-9 text-sm text-white placeholder:text-zinc-600 transition" />
         </div>
 
@@ -663,68 +649,68 @@ export default function BallBearings() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-zinc-900/80 text-zinc-500 text-xs border-b border-zinc-800">
-                  <th className="text-right py-3.5 px-5 font-medium">الماركة</th>
-                  <th className="text-right py-3.5 px-4 font-medium">الكود</th>
-                  <th className="text-right py-3.5 px-4 font-medium">القطر الداخلي</th>
-                  <th className="text-right py-3.5 px-4 font-medium">القطر الخارجي</th>
-                  <th className="text-right py-3.5 px-4 font-medium">العرض</th>
+                  <th className="text-right py-3.5 px-5 font-medium">الشركة</th>
+                  <th className="text-right py-3.5 px-4 font-medium">الوزن (kg)</th>
+                  <th className="text-right py-3.5 px-4 font-medium">الفولت</th>
+                  <th className="text-right py-3.5 px-4 font-medium">not_asstant</th>
                   <th className="text-right py-3.5 px-4 font-medium">المخزون</th>
                   <th className="text-right py-3.5 px-4 font-medium">الحالة</th>
-                  <th className="py-3.5 px-4 font-medium"></th>
+                  <th className="py-3.5 px-4"></th>
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((b) => (
+                {filtered.map((c) => (
                   <>
-                    {/* Main row */}
-                    <tr key={b._id} className={`border-t border-zinc-800/50 transition-colors ${expanded === b._id ? "bg-zinc-900/60" : "hover:bg-zinc-900/30"}`}>
-                      <td className="py-3.5 px-5 font-semibold text-white">{b.brandtype}</td>
-                      <td className="py-3.5 px-4 font-mono text-zinc-300 text-xs bg-zinc-800/30 rounded">{b.code}</td>
-                      <td className="py-3.5 px-4 text-zinc-400">{b.innerdiameter}</td>
-                      <td className="py-3.5 px-4 text-zinc-400">{b.outerdiameter}</td>
-                      <td className="py-3.5 px-4 text-zinc-400">{b.width}</td>
-                      <td className="py-3.5 px-4 font-bold text-white tabular-nums">{b.stock}</td>
-                      <td className="py-3.5 px-4"><StockBadge stock={b.stock} /></td>
+                    <tr key={c._id}
+                      className={`border-t border-zinc-800/50 transition-colors ${expanded === c._id ? "bg-zinc-900/60" : "hover:bg-zinc-900/30"}`}>
+                      <td className="py-3.5 px-5 font-semibold text-white">{c.companyName}</td>
+                      <td className="py-3.5 px-4 text-zinc-300">{c.mass_kg}</td>
+                      <td className="py-3.5 px-4 text-zinc-300">{c.volt}V</td>
+                      <td className="py-3.5 px-4 text-zinc-400 font-mono text-xs">{c.not_asstant}</td>
+                      <td className="py-3.5 px-4 font-bold text-white tabular-nums">{c.stock}</td>
+                      <td className="py-3.5 px-4"><StockBadge stock={c.stock} /></td>
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-1.5 justify-end">
-                          {/* Dispense */}
-                          <button onClick={() => setModal({ type: "dispense", bearing: b })} title="صرف"
-                            className="p-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition" disabled={b.stock === 0}>
+                          <button onClick={() => setModal({ type: "dispense", contactor: c })}
+                            title="صرف" disabled={c.stock === 0}
+                            className="p-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 disabled:opacity-30 disabled:cursor-not-allowed transition">
                             <TrendingDown size={14} />
                           </button>
-                          {/* Add stock */}
-                          <button onClick={() => setModal({ type: "addStock", bearing: b })} title="إضافة للمخزون"
+                          <button onClick={() => setModal({ type: "addStock", contactor: c })}
+                            title="إضافة مخزون"
                             className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition">
                             <TrendingUp size={14} />
                           </button>
-                          {/* Edit */}
-                          <button onClick={() => setModal({ type: "edit", bearing: b })} title="تعديل"
+                          <button onClick={() => setModal({ type: "edit", contactor: c })}
+                            title="تعديل"
                             className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition">
                             <Pencil size={14} />
                           </button>
-                          {/* Delete */}
-                          <button onClick={() => setModal({ type: "delete", bearing: b })} title="حذف"
+                          <button onClick={() => setModal({ type: "delete", contactor: c })}
+                            title="حذف"
                             className="p-1.5 rounded-lg bg-zinc-700/60 text-zinc-400 hover:bg-red-500/20 hover:text-red-400 transition">
                             <Trash2 size={14} />
                           </button>
-                          {/* History */}
-                          <button onClick={() => setExpanded(expanded === b._id ? null : b._id)} title="الحركات"
-                            className={`p-1.5 rounded-lg transition ${expanded === b._id ? "bg-orange-500/20 text-orange-400" : "bg-zinc-700/60 text-zinc-400 hover:bg-zinc-700"}`}>
-                            {expanded === b._id ? <ChevronUp size={14} /> : <History size={14} />}
+                          <button onClick={() => setExpanded(expanded === c._id ? null : c._id)}
+                            title="الحركات"
+                            className={`p-1.5 rounded-lg transition ${expanded === c._id ? "bg-yellow-500/20 text-yellow-400" : "bg-zinc-700/60 text-zinc-400 hover:bg-zinc-700"}`}>
+                            {expanded === c._id ? <ChevronUp size={14} /> : <History size={14} />}
                           </button>
                         </div>
                       </td>
                     </tr>
 
                     {/* Expanded movements */}
-                    {expanded === b._id && (
-                      <tr key={`${b._id}-movements`} className="border-t border-zinc-800/30">
-                        <td colSpan={8} className="bg-zinc-900/40 px-5 py-4">
+                    {expanded === c._id && (
+                      <tr key={`${c._id}-mv`} className="border-t border-zinc-800/30">
+                        <td colSpan={7} className="bg-zinc-900/40 px-5 py-4">
                           <div className="flex items-center gap-2 mb-3">
-                            <History size={13} className="text-orange-400" />
-                            <span className="text-xs font-semibold text-zinc-400">سجل حركات {b.code}</span>
+                            <History size={13} className="text-yellow-400" />
+                            <span className="text-xs font-semibold text-zinc-400">
+                              سجل حركات {c.companyName} — {c.volt}V
+                            </span>
                           </div>
-                          <MovementsPanel bearingId={b._id} />
+                          <MovementsPanel contactorId={c._id} />
                         </td>
                       </tr>
                     )}
@@ -737,11 +723,11 @@ export default function BallBearings() {
       </div>
 
       {/* ── Modals ── */}
-      {modal?.type === "add"          && <AddBearingModal onClose={() => setModal(null)} onSuccess={() => fetchBearings(true)} />}
-      {modal?.type === "edit"         && <EditBearingModal bearing={modal.bearing} onClose={() => setModal(null)} onSuccess={() => fetchBearings(true)} />}
-      {modal?.type === "dispense"     && <DispenseModal bearing={modal.bearing} onClose={() => setModal(null)} onSuccess={() => fetchBearings(true)} />}
-      {modal?.type === "addStock"     && <AddStockModal bearing={modal.bearing} onClose={() => setModal(null)} onSuccess={() => fetchBearings(true)} />}
-      {modal?.type === "delete"       && <DeleteModal bearing={modal.bearing} onClose={() => setModal(null)} onSuccess={() => fetchBearings(true)} />}
+      {modal?.type === "add"          && <AddContactorModal onClose={() => setModal(null)} onSuccess={() => fetchContactors(true)} />}
+      {modal?.type === "edit"         && <EditContactorModal contactor={modal.contactor} onClose={() => setModal(null)} onSuccess={() => fetchContactors(true)} />}
+      {modal?.type === "dispense"     && <DispenseModal contactor={modal.contactor} onClose={() => setModal(null)} onSuccess={() => fetchContactors(true)} />}
+      {modal?.type === "addStock"     && <AddStockModal contactor={modal.contactor} onClose={() => setModal(null)} onSuccess={() => fetchContactors(true)} />}
+      {modal?.type === "delete"       && <DeleteModal contactor={modal.contactor} onClose={() => setModal(null)} onSuccess={() => fetchContactors(true)} />}
       {modal?.type === "allMovements" && <AllMovementsModal onClose={() => setModal(null)} />}
     </div>
   );

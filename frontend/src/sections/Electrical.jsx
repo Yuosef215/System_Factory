@@ -1,47 +1,120 @@
 import { useNavigate } from "react-router-dom";
+import {
+  Zap, Settings2, Timer, Cable, Gauge, Waves, ArrowRight
+} from "lucide-react";
 
+const SECTIONS = [
+  {
+    key: "contactors",
+    label: "الكونتاكتورات",
+    description: "إدارة مخزون الكونتاكتورات، الصرف، الإضافة، وتتبع الحركات",
+    icon: Zap,
+    color: "from-yellow-500/20 to-yellow-600/5",
+    border: "border-yellow-500/20",
+    iconColor: "text-yellow-400",
+    path: "/electrical/contactors",
+  },
+  {
+    key: "keys",
+    label: "المفاتيح",
+    description: "إدارة مخزون المفاتيح الكهربائية بأنواعها وألوانها",
+    icon: Settings2,
+    color: "from-blue-500/20 to-blue-600/5",
+    border: "border-blue-500/20",
+    iconColor: "text-blue-400",
+    path: "/electrical/keys",
+  },
+  {
+    key: "timers",
+    label: "التايمرات",
+    description: "إدارة مخزون التايمرات ومتابعة الشركات المصنعة",
+    icon: Timer,
+    color: "from-purple-500/20 to-purple-600/5",
+    border: "border-purple-500/20",
+    iconColor: "text-purple-400",
+    path: "/electrical/timers",
+  },
+  {
+    key: "cables",
+    label: "الكابلات",
+    description: "إدارة مخزون الكابلات بالمواصفات والأطوال",
+    icon: Cable,
+    color: "from-orange-500/20 to-orange-600/5",
+    border: "border-orange-500/20",
+    iconColor: "text-orange-400",
+    path: "/electrical/cables",
+  },
+  {
+    key: "metrostar",
+    label: "الميترو ستار",
+    description: "إدارة مخزون الميترو ستار وتتبع التيار والشركة",
+    icon: Gauge,
+    color: "from-emerald-500/20 to-emerald-600/5",
+    border: "border-emerald-500/20",
+    iconColor: "text-emerald-400",
+    path: "/electrical/metrostar",
+  },
+  {
+    key: "hose",
+    label: "الخراطيم الكهربائية",
+    description: "إدارة مخزون الخراطيم بالأقطار والأطوال المختلفة",
+    icon: Waves,
+    color: "from-cyan-500/20 to-cyan-600/5",
+    border: "border-cyan-500/20",
+    iconColor: "text-cyan-400",
+    path: "/electrical/hose",
+  },
+];
 
-function Electrical() {
-    
+export default function Electrical() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-gray-950 via-gray-900 to-gray-800 p-10">
-       {/* Header */}
-            <h1 className="text-5xl font-bold text-white mb-10">
-                Welcome to Iron Factory Dashboard
-            </h1>
-      {/* Cards Container */}
-      <div className="flex flex-wrap gap-8 items-start">
+    <div className="min-h-screen bg-zinc-950 text-white" dir="rtl">
+      {/* Header */}
+      <div className="border-b border-zinc-800/60 px-8 py-5">
+        <div className="flex items-center gap-3 text-sm text-zinc-500 mb-1">
+          <button
+            onClick={() => navigate("/home")}
+            className="hover:text-white transition flex items-center gap-1.5"
+          >
+            <ArrowRight size={14} /> الرئيسية
+          </button>
+          <span>/</span>
+          <span className="text-white">الكهرباء</span>
+        </div>
+        <h1 className="text-2xl font-bold text-white">القسم الكهربائي</h1>
+        <p className="text-zinc-500 text-sm mt-1">اختر القسم الفرعي</p>
+      </div>
 
-        <div className="w-[320px] bg-white rounded-2xl border border-zinc-200 overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-          {/* Image */}
-          <div className="h-44 bg-gradient-to-br from-zinc-700 to-zinc-900 relative">
-            <div className="absolute inset-0 bg-black/10" />
-          </div>
-
-          {/* Content */}
-          <div className="p-5">
-            <h2 className="text-2xl font-bold text-zinc-900">
-              Electrical Section
-            </h2>
-            <p className="text-zinc-500 mt-3 leading-relaxed">
-              Monitor and manage all operations inside the factory system.
-            </p>
-          </div>
-
-          {/* Footer */}
-          <div className="border-t border-zinc-200 p-4">
-            <button
-              className="w-full bg-black hover:bg-zinc-800 text-white font-semibold py-3 rounded-xl transition-all duration-300"
-              onClick={() => navigate("/electrical")}>
-              Open Section
-            </button>
-          </div>
+      <div className="px-8 py-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-4xl">
+          {SECTIONS.map((s) => {
+            const Icon = s.icon;
+            return (
+              <button
+                key={s.key}
+                onClick={() => navigate(s.path)}
+                className={`group text-right bg-gradient-to-br ${s.color} border ${s.border} rounded-2xl p-6 hover:scale-[1.02] transition-all duration-200 shadow-lg`}
+              >
+                <div
+                  className={`w-11 h-11 rounded-xl bg-zinc-900 flex items-center justify-center mb-4 ${s.iconColor}`}
+                >
+                  <Icon size={22} />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-1">{s.label}</h3>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  {s.description}
+                </p>
+                <div className="flex items-center gap-1 mt-4 text-xs text-zinc-500 group-hover:text-white transition">
+                  <span>فتح القسم</span>
+                  <ArrowRight size={12} className="rotate-180" />
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
   );
 }
-
-export default Electrical;

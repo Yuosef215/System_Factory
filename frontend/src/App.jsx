@@ -4,6 +4,7 @@ import Home from './components/Home';
 import Mechanical from './sections/mechanical';
 import BallBearings from './subSections/BallBearings';
 import Electrical from './sections/electrical';
+import Contactors from './subSections/Contactors';
 
 function App() {
 
@@ -27,7 +28,11 @@ function App() {
     {
       path: "/electrical",
       element: <Electrical/>
-    }
+    },
+    { 
+      path: "/electrical/contactors", 
+      element: <Contactors /> 
+    },
   ])
 
   return (
