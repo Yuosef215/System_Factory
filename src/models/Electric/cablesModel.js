@@ -15,3 +15,6 @@ const cablesSchema = new mongoose.Schema({
         required: true
     },
 }, { timestamps: true, versionKey: false });
+
+const cablesModel = mongoose.model('cables', cablesSchema);
+export default cablesModel;
