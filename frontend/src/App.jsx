@@ -5,6 +5,7 @@ import Mechanical from './sections/mechanical';
 import BallBearings from './subSections/BallBearings';
 import Electrical from './sections/electrical';
 import Contactors from './subSections/Contactors';
+import CreateUser from './Auth/CreateUser';
 
 function App() {
 
@@ -33,6 +34,7 @@ function App() {
       path: "/electrical/contactors", 
       element: <Contactors /> 
     },
+    { path: "/create-user", element: <CreateUser /> },
   ])
 
   return (

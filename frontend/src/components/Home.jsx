@@ -1,79 +1,157 @@
 import { useNavigate } from "react-router-dom";
+import { Cog, Zap, LogOut, Factory, ChevronLeft, UserPlus } from "lucide-react";
 
-function Home() {
+const SECTIONS = [
+  {
+    key: "mechanical",
+    label: "القسم الميكانيكي",
+    labelEn: "Mechanical",
+    description: "إدارة البيرينجات، الرولات، وكل قطع الغيار الميكانيكية",
+    icon: Cog,
+    path: "/mechanical",
+    accent: "bg-orange-500",
+    iconBg: "bg-orange-500/10 border-orange-500/20",
+    iconColor: "text-orange-400",
+    hoverBorder: "hover:border-orange-500/40",
+    tag: "bg-orange-500/10 text-orange-400 border border-orange-500/20",
+    items: ["بيرينجات", "رولات"],
+  },
+  {
+    key: "electrical",
+    label: "القسم الكهربائي",
+    labelEn: "Electrical",
+    description: "إدارة الكونتاكتورات، الكابلات، التايمرات، والمواد الكهربائية",
+    icon: Zap,
+    path: "/electrical",
+    accent: "bg-yellow-500",
+    iconBg: "bg-yellow-500/10 border-yellow-500/20",
+    iconColor: "text-yellow-400",
+    hoverBorder: "hover:border-yellow-500/40",
+    tag: "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20",
+    items: ["كونتاكتورات", "كابلات", "تايمرات", "مفاتيح", "ميترو ستار", "خراطيم"],
+  },
+];
 
-    const navigate = useNavigate();
+const CAN_CREATE = ["developer", "gm", "ceo"];
 
-    return (
-        <div className="flex flex-row gap-10 min-h-screen bg-gradient-to-r from-gray-950 via-gray-900 to-gray-800 p-10">
-            <h1 className="text-5xl font-bold text-white mb-10">
-                Welcome to Iron Factory Dashboard
-            </h1>
+export default function Home() {
+  const navigate = useNavigate();
 
-            {/* Cards Container */}
-            <div className="flex flex-wrap gap-8 items-start">
+  let user = {};
+  try {
+    user = JSON.parse(localStorage.getItem("user") || "{}");
+  } catch {
+    user = {};
+  }
 
-                <div className="w-[320px] bg-white rounded-2xl border border-zinc-200 overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-                    {/* Image */}
-                    <div className="h-44 bg-gradient-to-br from-zinc-700 to-zinc-900 relative">
-                        <div className="absolute inset-0 bg-black/10" />
-                    </div>
+  const canCreateUser = CAN_CREATE.includes(user?.role);
 
-                    {/* Content */}
-                    <div className="p-5">
-                        <h2 className="text-2xl font-bold text-zinc-900">
-                            Mechanical Section
-                        </h2>
-                        <p className="text-zinc-500 mt-3 leading-relaxed">
-                            Monitor and manage all operations inside the factory system.
-                        </p>
-                    </div>
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/");
+  };
 
-                    {/* Footer */}
-                    <div className="border-t border-zinc-200 p-4">
-                        <button
-                            className="w-full bg-black hover:bg-zinc-800 text-white font-semibold py-3 rounded-xl transition-all duration-300"
-                            onClick={() => navigate("/mechanical")}
-                        >
-                            Open Section
-                        </button>
-                    </div>
-                </div>
+  return (
+    <div className="min-h-screen bg-zinc-950 text-white" dir="rtl">
 
+      {/* Navbar */}
+      <header className="border-b border-zinc-800/60 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-20">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-orange-500/10 border border-orange-500/30 rounded-xl flex items-center justify-center">
+              <Factory size={18} className="text-orange-500" />
             </div>
-
-            <div className="flex flex-wrap gap-8 items-start">
-
-                <div className="w-[320px] bg-white rounded-2xl border border-zinc-200 overflow-hidden shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-                    {/* Image */}
-                    <div className="h-44 bg-gradient-to-br from-zinc-700 to-zinc-900 relative">
-                        <div className="absolute inset-0 bg-black/10" />
-                    </div>
-
-                    {/* Content */}
-                    <div className="p-5">
-                        <h2 className="text-2xl font-bold text-zinc-900">
-                            Electrical Section
-                        </h2>
-                        <p className="text-zinc-500 mt-3 leading-relaxed">
-                            Monitor and manage all operations inside the factory system.
-                        </p>
-                    </div>
-
-                    {/* Footer */}
-                    <div className="border-t border-zinc-200 p-4">
-                        <button
-                            className="w-full bg-black hover:bg-zinc-800 text-white font-semibold py-3 rounded-xl transition-all duration-300"
-                            onClick={() => navigate("/electrical")}
-                        >
-                            Open Section
-                        </button>
-                    </div>
-                </div>
-
+            <div>
+              <h1 className="text-sm font-bold text-white leading-none">Iron Factory</h1>
+              <p className="text-[10px] text-zinc-500 mt-0.5">نظام إدارة المخزون</p>
             </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {user?.name && (
+              <span className="text-xs text-zinc-500 ml-2">
+                مرحباً، <span className="text-zinc-300 font-medium">{user.name}</span>
+              </span>
+            )}
+
+            {canCreateUser && (
+              <button
+                onClick={() => navigate("/create-user")}
+                className="flex items-center gap-2 text-zinc-400 hover:text-orange-400 text-sm transition px-3 py-1.5 rounded-xl hover:bg-orange-500/10 border border-transparent hover:border-orange-500/20"
+              >
+                <UserPlus size={15} />
+                مستخدم جديد
+              </button>
+            )}
+
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 text-zinc-400 hover:text-red-400 text-sm transition px-3 py-1.5 rounded-xl hover:bg-red-500/10 border border-transparent hover:border-red-500/20"
+            >
+              <LogOut size={15} />
+              تسجيل الخروج
+            </button>
+          </div>
         </div>
-    );
-}
+      </header>
 
-export default Home;
+      {/* Body */}
+      <div className="max-w-6xl mx-auto px-6 pt-14 pb-16">
+        <div className="mb-12">
+          <span className="text-xs font-semibold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-3 py-1 rounded-full">
+            لوحة التحكم الرئيسية
+          </span>
+          <p className="text-zinc-500 mt-3 text-sm max-w-md leading-relaxed">
+            اختر القسم الذي تريد إدارته —
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {SECTIONS.map((s) => {
+            const Icon = s.icon;
+            return (
+              <div
+                key={s.key}
+                onClick={() => navigate(s.path)}
+                className={`group relative bg-zinc-900/60 border border-zinc-800 ${s.hoverBorder} rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.01] hover:shadow-2xl hover:shadow-black/40`}
+              >
+                <div className={`absolute top-0 left-0 right-0 h-px ${s.accent} opacity-50`} />
+                <div className="p-7">
+                  <div className="flex items-start justify-between mb-6">
+                    <div className={`w-12 h-12 rounded-xl border ${s.iconBg} flex items-center justify-center`}>
+                      <Icon size={24} className={s.iconColor} />
+                    </div>
+                    <span className={`text-xs font-mono px-2.5 py-1 rounded-lg ${s.tag}`}>
+                      {s.labelEn}
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">{s.label}</h3>
+                  <p className="text-zinc-400 text-sm leading-relaxed mb-6">{s.description}</p>
+                  <div className="flex flex-wrap gap-2 mb-6">
+                    {s.items.map((item) => (
+                      <span key={item} className="text-xs text-zinc-500 bg-zinc-800/80 border border-zinc-700/50 px-2.5 py-1 rounded-lg">
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-zinc-300 group-hover:text-white transition">
+                      فتح القسم
+                    </span>
+                    <div className={`w-8 h-8 rounded-xl border ${s.iconBg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                      <ChevronLeft size={16} className={s.iconColor} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <p className="text-center text-zinc-700 text-xs mt-16">
+          Iron Factory System — نظام إدارة مخازن المصنع
+        </p>
+      </div>
+    </div>
+  );
+}

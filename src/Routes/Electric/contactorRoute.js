@@ -11,18 +11,18 @@ import {
     getAllContactorMovements
 } from '../../Services/Electric/ContactorServices.js';
 
-import { protect } from '../../Services/users/usersSevices.js';
+import { protect, allowedTo } from '../../Services/users/usersSevices.js';
 
 const router = express.Router();
 
-router.post("/createContactor", protect, ctreateContactor);
-router.get("/", protect, getAllContactors);
-router.get("/allMovements", protect, getAllContactorMovements); // ✅ قبل /:id
-router.patch("/dispense/:id", protect, dispenseContactor);     // ✅ قبل /:id
-router.patch("/addStock/:id", protect, AddStockContactor);     // ✅ قبل /:id
-router.get("/movements/:id", protect, getContactorMovements);  // ✅ قبل /:id
-router.get("/:id", protect, getContactor);
-router.put("/:id", protect, updateContactor);
-router.delete("/:id", protect, deleteContactor);
+router.post("/createContactor", protect, allowedTo("warehouse_worker","developer"), ctreateContactor);
+router.get("/", protect, allowedTo("warehouse_worker","developer","warehouse_manager","electricity_manager"), getAllContactors);
+router.get("/allMovements", protect, allowedTo("warehouse_worker","developer","warehouse_manager"), getAllContactorMovements);
+router.patch("/dispense/:id", protect, allowedTo("warehouse_worker","developer","warehouse_manager"), dispenseContactor);
+router.patch("/addStock/:id", protect, allowedTo("warehouse_worker","developer","warehouse_manager"), AddStockContactor);
+router.get("/movements/:id", protect, allowedTo("warehouse_worker","developer","warehouse_manager"), getContactorMovements);
+router.get("/:id", protect, allowedTo("warehouse_worker","developer","warehouse_manager"), getContactor);
+router.put("/:id", protect, allowedTo("developer","warehouse_manager"), updateContactor);
+router.delete("/:id", protect, allowedTo("developer","warehouse_manager"), deleteContactor);
 
 export default router;

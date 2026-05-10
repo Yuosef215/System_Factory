@@ -14,7 +14,7 @@ const SECTIONS = [
   },
   {
     key: "rolls",
-    label: "الرولات",
+    label: "الدرافيل",
     description: "إدارة مخزون الرولات وتتبع حركات الصرف والإضافة",
     icon: Cog,
     color: "from-blue-500/20 to-blue-600/5",
