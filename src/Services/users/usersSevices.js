@@ -82,3 +82,40 @@ export const allowedTo = (...roles) =>
         next();
         // 3)
 });
+
+export const getAllUsers = asynchandler(async (req, res, next) => {
+    const users = await UserModel.find();
+    res.status(200).json({ message: "Users retrieved successfully", result: users.length, data: users });
+});
+
+export const deleteUser = asynchandler(async (req, res, next) => {
+    const { id } = req.params;
+    const user = await UserModel.findByIdAndDelete(id);
+    if (!user) {
+        return next(new ApiError("User not found", 404));
+    }
+    res.status(200).json({ message: "User deleted successfully" });
+});
+
+export const updateUser = asynchandler(async (req, res, next) => {
+    const { id } = req.params;
+    const { name, code, role, password } = req.body;
+    const updateData = { name, code, role };
+    if (password) {
+        updateData.password = await bcrypt.hash(password, 12);
+    }
+    const user = await UserModel.findByIdAndUpdate(id, updateData, { new: true });
+    if (!user) {
+        return next(new ApiError("User not found", 404));
+    }
+    res.status(200).json({ message: "User updated successfully", data: user });
+});
+
+export const notActiveUser = asynchandler(async (req, res, next) => {
+    const { id } = req.params;
+    const user = await UserModel.findByIdAndUpdate(id, { active: false }, { new: true });
+    if (!user) {
+        return next(new ApiError("User not found", 404));
+    }
+    res.status(200).json({ message: "User deactivated successfully", data: user });
+});

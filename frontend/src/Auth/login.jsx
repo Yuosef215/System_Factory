@@ -17,7 +17,7 @@ export default function Login() {
     try {
       const res = await api.post("/users/login", data);
       localStorage.setItem("token", res.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.data));
+      localStorage.setItem('user', JSON.stringify(res.data.data));
       navigate("/home");
     } catch (err) {
       setServerError(err.response?.data?.message || "كود أو كلمة مرور غلط");

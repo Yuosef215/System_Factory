@@ -84,7 +84,7 @@ export default function Home() {
                 مستخدم جديد
               </button>
             )}
-
+                <button onClick={() => navigate("/users")}>إدارة المستخدمين</button>
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 text-zinc-400 hover:text-red-400 text-sm transition px-3 py-1.5 rounded-xl hover:bg-red-500/10 border border-transparent hover:border-red-500/20"
