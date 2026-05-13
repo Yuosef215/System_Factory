@@ -7,6 +7,7 @@ import Electrical from './sections/electrical';
 import Contactors from './subSections/Contactors';
 import CreateUser from './Auth/CreateUser';
 import Users from './pages/Users';
+import Rolls from './subSections/Rolls'
 
 function App() {
 
@@ -37,6 +38,7 @@ function App() {
     },
     { path: "/create-user", element: <CreateUser /> },
     { path: "/users", element: <Users /> },
+    { path: "/rolls", element: <Rolls /> }
   ])
 
   return (

@@ -4,7 +4,7 @@ import { Cog, CircleDot, ArrowRight } from "lucide-react";
 const SECTIONS = [
   {
     key: "ballbearings",
-    label: "البيرينجات",
+    label: "مخزن البلي",
     description: "إدارة مخزون البيرينجات، الصرف، الإضافة، وعرض الحركات",
     icon: CircleDot,
     color: "from-orange-500/20 to-orange-600/5",
