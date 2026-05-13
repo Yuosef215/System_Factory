@@ -36,7 +36,7 @@ import {
   getOffersByRequest,
   approvePriceOffer,
   rejectPriceOffer,
-} from "../../Services/Purchases/PriceOfferService.js";
+} from "../../Services/purchases/PriceOfferService.js";
 
 const offerRouter = express.Router();
 
@@ -60,7 +60,7 @@ import {
   getAllPurchaseOrders,
   getPurchaseOrderById,
   confirmReceivedItems,
-} from "../../Services/Purchases/PurchaseOrderService.js";
+} from "../../Services/purchases/PurchaseOrderService.js";
 
 const orderRouter = express.Router();
 
