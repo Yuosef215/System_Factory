@@ -30,7 +30,7 @@ export const dispenseBallBearing = asynchandler(async (req, res, next) => {
         quantity,
         process: "صرف",
         reason,
-        createdBy: req.user.name, // ← لو ما جاش createdBy، حط "unknown"
+        createdBy: req.user.name,
         balanceBefore,
         balanceAfter: ballBearing.stock,
     });
