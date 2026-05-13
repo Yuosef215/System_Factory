@@ -74,7 +74,7 @@ export const dispenseContactor = asyncHandler(async (req, res, next) => {
         contactor: id,
         quantity,
         process: "صرف",
-        reason,
+        reason: req.user.name,
         createdBy: req.user.name, // ← عرّفناها هن
         balanceBefore: contactor.stock + quantity,
         balanceAfter: contactor.stock,

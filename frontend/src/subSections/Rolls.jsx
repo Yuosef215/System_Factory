@@ -442,7 +442,7 @@ export default function Rolls() {
   const stats = {
     total:      rolls.length,
     outOfStock: rolls.filter((r) => r.stock === 0).length,
-    low:        rolls.filter((r) => r.stock > 0 && r.stock < 1).length,
+    low:        rolls.filter((r) => r.stock > 0 && r.stock < 5).length,
     totalStock: rolls.reduce((s, r) => s + r.stock, 0),
   };
 
