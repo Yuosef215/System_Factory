@@ -1,8 +1,10 @@
 import asyncHandler from "express-async-handler";
 import ApiError from "../../../utils/apiError.js";
-import InspectionReport from "../../models/Purchases/InspectionReport.js";
-import PurchaseOrder from "../../models/Purchases/PurchaseOrder.js";
-import PurchaseRequestModel from "../../models/Purchases/PurchaseRequestModel.js";
+import InspectionReport from "../../models/purchases/InspectionReport.js";
+import PurchaseOrder from "../../models/purchases/PurchaseOrder.js";
+import PurchaseRequestModel from "../../models/purchases/PurchaseRequest.js";
+import { io } from "../../../server.js";
+
 
 // ─── إنشاء تقرير فحص واستلام ────────────────────────────────────────
 export const createInspectionReport = asyncHandler(async (req, res, next) => {
@@ -26,6 +28,13 @@ export const createInspectionReport = asyncHandler(async (req, res, next) => {
   });
 
   res.status(201).json({ success: true, data: report });
+  io.to("warehouse_manager").to("developer").emit("notification", {
+  type: "new_inspection",
+  title: "تقرير فحص جديد",
+  message: `${req.user.name} أنشأ تقرير فحص — محضر ${report.reportNumber}`,
+  data: { reportNumber: report.reportNumber, id: report._id },
+  createdAt: new Date(),
+});
 });
 
 // ─── جلب كل تقارير الفحص ────────────────────────────────────────────
@@ -65,6 +74,13 @@ export const approveInspectionReport = asyncHandler(async (req, res, next) => {
   }
 
   res.status(200).json({ success: true, data: report });
+  io.to("warehouse_worker").to("warehouse_manager").to("developer").emit("notification", {
+  type: "inspection_approved",
+  title: "✅ تم اعتماد تقرير الفحص",
+  message: `تم اعتماد تقرير الفحص — محضر ${report.reportNumber}، جاهز للإضافة للمخزن`,
+  data: { reportNumber: report.reportNumber, id: report._id },
+  createdAt: new Date(),
+});
 });
 
 // ─── تأكيد الإضافة للمخزن ───────────────────────────────────────────
@@ -87,4 +103,11 @@ export const getPendingInventoryAdditions = asyncHandler(async (req, res, next) 
     addedToInventory: false,
   }).populate("purchaseOrder", "reportNumber confirmedBy");
   res.status(200).json({ success: true, count: reports.length, data: reports });
+  io.to("purchase_manager").to("warehouse_manager").to("developer").emit("notification", {
+  type: "added_to_inventory",
+  title: "🏭 تمت الإضافة للمخزن",
+  message: `تمت إضافة بنود المحضر ${report.reportNumber} للمخزن`,
+  data: { reportNumber: report.reportNumber, id: report._id },
+  createdAt: new Date(),
+});
 });

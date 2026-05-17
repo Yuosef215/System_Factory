@@ -1,6 +1,8 @@
 import asyncHandler from "express-async-handler";
 import ApiError from "../../../utils/apiError.js";
 import PurchaseRequestModel from "../../models/purchases/PurchaseRequest.js";
+import { io } from "../../../server.js";
+
 
 // ─── إنشاء طلب شراء جديد ───────────────────────────────────────────
 export const createPurchaseRequest = asyncHandler(async (req, res, next) => {
@@ -14,13 +16,20 @@ export const createPurchaseRequest = asyncHandler(async (req, res, next) => {
 
   const request = await PurchaseRequestModel.create({
     reportNumber,
-    requestedBy: req.user.name,
+    requestedBy:req.user.name,
     status: "pending",
     items,
     notes,
   });
 
   res.status(201).json({ success: true, data: request });
+  io.to("gm").to("ceo").to("developer").emit("notification", {
+    type: "new_purchase_request",
+    title: "طلب شراء جديد",
+    message: `${req.user.name} أنشأ طلب شراء — محضر ${reportNumber}`,
+    data: { reportNumber, id: request._id },
+    createdAt: new Date(),
+  });
 });
 
 // ─── جلب كل طلبات الشراء ────────────────────────────────────────────

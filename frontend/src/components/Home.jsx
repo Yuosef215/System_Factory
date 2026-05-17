@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { Cog, Zap, LogOut, Factory, ChevronLeft, UserPlus } from "lucide-react";
+import { Cog, Zap, LogOut, Factory, ChevronLeft, UserPlus, PackageOpen,ShoppingCart  } from "lucide-react";
+import { NotificationBell } from "../components/NotificationProvider.jsx";
+
 
 const SECTIONS = [
   {
@@ -16,6 +18,20 @@ const SECTIONS = [
     tag: "bg-orange-500/10 text-orange-400 border border-orange-500/20",
     items: ["بيرينجات", "رولات"],
   },
+  {
+  key: "purchases",
+  label: "المشتريات",
+  labelEn: "Purchases",
+  description: "إدارة طلبات الشراء، عروض الأسعار، أوامر الشراء، والفحص والاستلام",
+  icon: ShoppingCart,
+  path: "/purchases/requests",
+  accent: "bg-blue-500",
+  iconBg: "bg-blue-500/10 border-blue-500/20",
+  iconColor: "text-blue-400",
+  hoverBorder: "hover:border-blue-500/40",
+  tag: "bg-blue-500/10 text-blue-400 border border-blue-500/20",
+  items: ["طلبات شراء", "عروض أسعار", "أوامر شراء", "فحص واستلام"],
+},
   {
     key: "electrical",
     label: "القسم الكهربائي",
@@ -74,6 +90,11 @@ export default function Home() {
                 مرحباً، <span className="text-zinc-300 font-medium">{user.name}</span>
               </span>
             )}
+            {user?.role && (
+              <span className="text-xs text-zinc-500 ml-2">
+                The Role {user.role}
+              </span>
+            )}
 
             {canCreateUser && (
               <button
@@ -84,6 +105,7 @@ export default function Home() {
                 مستخدم جديد
               </button>
             )}
+            <NotificationBell />
                 <button onClick={() => navigate("/users")}>إدارة المستخدمين</button>
             <button
               onClick={handleLogout}

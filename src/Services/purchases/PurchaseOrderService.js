@@ -1,8 +1,10 @@
 import asyncHandler from "express-async-handler";
 import ApiError from "../../../utils/apiError.js";
 import PurchaseOrder from "../../models/purchases/PurchaseOrder.js";
-import PriceOffer from "../../models/purchases/PriceOffer.js";
-import PurchaseRequestModel from "../../models/Purchases/PurchaseRequestModel.js";
+import PriceOffer from "../../models/purchases/priceOffer.js";
+import PurchaseRequestModel from "../../models/purchases/PurchaseRequest.js";
+import { io } from "../../../server.js";
+
 
 // ─── إنشاء أمر شراء (بعد موافقة المدير) ────────────────────────────
 export const createPurchaseOrder = asyncHandler(async (req, res, next) => {
@@ -40,6 +42,13 @@ export const createPurchaseOrder = asyncHandler(async (req, res, next) => {
   await PurchaseRequestModel.findByIdAndUpdate(offer.purchaseRequest, { status: "ordered" });
 
   res.status(201).json({ success: true, data: order });
+  io.to("warehouse_manager").to("warehouse_worker").to("developer").emit("notification", {
+  type: "new_purchase_order",
+  title: "أمر شراء جديد",
+  message: `تم إنشاء أمر شراء — محضر ${order.reportNumber}`,
+  data: { reportNumber: order.reportNumber, id: order._id },
+  createdAt: new Date(),
+});
 });
 
 // ─── جلب كل أوامر الشراء ────────────────────────────────────────────
@@ -94,4 +103,13 @@ export const confirmReceivedItems = asyncHandler(async (req, res, next) => {
   }
 
   res.status(200).json({ success: true, data: order });
+  if (allComplete) {
+  io.to("warehouse_manager").to("developer").emit("notification", {
+    type: "order_complete",
+    title: "📦 اكتمل استلام أمر الشراء",
+    message: `تم استلام جميع بنود المحضر ${order.reportNumber}`,
+    data: { reportNumber: order.reportNumber, id: order._id },
+    createdAt: new Date(),
+  });
+}
 });

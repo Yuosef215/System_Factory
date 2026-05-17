@@ -9,6 +9,9 @@ import CreateUser from './Auth/CreateUser';
 import Users from './pages/Users';
 import Rolls from './subSections/Rolls'
 import PurchaseRequests from './pages/purchases/PurchaseRequests';
+import PriceOffers from './pages/purchases/PriceOffers';
+import PurchaseOrders from './pages/purchases/PurchaseOrders';
+import Inspection from './pages/purchases/Inspection'
 
 
 function App() {
@@ -42,6 +45,9 @@ function App() {
     { path: "/users", element: <Users /> },
     { path: "/rolls", element: <Rolls /> },
     { path: "/purchases/requests", element: <PurchaseRequests /> },
+    { path: "/purchases/offers", element: <PriceOffers /> },
+    { path: "/purchases/orders",     element: <PurchaseOrders /> },
+    { path: "/purchases/inspection", element: <Inspection /> },
 
   ])
 

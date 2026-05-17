@@ -1,7 +1,9 @@
 import asyncHandler from "express-async-handler";
 import ApiError from "../../../utils/apiError.js";
-import PriceOffer from "../../models/purchases/PriceOffer.js";
-import PurchaseRequestModel from "../../models/Purchases/PurchaseRequestModel.js";
+import PriceOffer from "../../models/purchases/priceOffer.js";
+import PurchaseRequestModel from "../../models/purchases/PurchaseRequest.js";
+import { io } from "../../../server.js";
+
 
 // ─── إنشاء عرض أسعار ────────────────────────────────────────────────
 export const createPriceOffer = asyncHandler(async (req, res, next) => {
@@ -32,6 +34,13 @@ export const createPriceOffer = asyncHandler(async (req, res, next) => {
   await PurchaseRequestModel.findByIdAndUpdate(purchaseRequest, { status: "price_offered" });
 
   res.status(201).json({ success: true, data: offer });
+  io.to("gm").to("ceo").to("developer").emit("notification", {
+  type: "new_price_offer",
+  title: "عرض أسعار جديد",
+  message: `${req.user.name} أضاف عرض أسعار — محضر ${request.reportNumber}`,
+  data: { reportNumber: request.reportNumber, id: offer._id },
+  createdAt: new Date(),
+});
 });
 
 // ─── جلب كل عروض الأسعار ────────────────────────────────────────────
@@ -73,6 +82,13 @@ export const approvePriceOffer = asyncHandler(async (req, res, next) => {
   await PurchaseRequestModel.findByIdAndUpdate(offer.purchaseRequest, { status: "approved" });
 
   res.status(200).json({ success: true, data: offer });
+  io.to("purchase_manager").to("developer").emit("notification", {
+  type: "offer_approved",
+  title: "✅ تمت الموافقة على عرض الأسعار",
+  message: `${req.user.name} وافق على عرض الأسعار — محضر ${offer.reportNumber}`,
+  data: { reportNumber: offer.reportNumber, id: offer._id },
+  createdAt: new Date(),
+});
 });
 
 // ─── رفض عرض الأسعار ────────────────────────────────────────────────
@@ -93,4 +109,11 @@ export const rejectPriceOffer = asyncHandler(async (req, res, next) => {
   await PurchaseRequestModel.findByIdAndUpdate(offer.purchaseRequest, { status: "rejected" });
 
   res.status(200).json({ success: true, data: offer });
+  io.to("purchase_manager").to("developer").emit("notification", {
+  type: "offer_rejected",
+  title: "❌ تم رفض عرض الأسعار",
+  message: `${req.user.name} رفض عرض الأسعار — محضر ${offer.reportNumber}`,
+  data: { reportNumber: offer.reportNumber, id: offer._id },
+  createdAt: new Date(),
+});
 });
