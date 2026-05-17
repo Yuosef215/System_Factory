@@ -6,7 +6,7 @@ import { io } from "../../../server.js";
 
 // ─── إنشاء طلب شراء جديد ───────────────────────────────────────────
 export const createPurchaseRequest = asyncHandler(async (req, res, next) => {
-  const { reportNumber, items, notes } = req.body;
+  const { reportNumber, items, notes, specialized_engineer, Requesting_party } = req.body;
 
   if (!reportNumber) return next(new ApiError("رقم المحضر مطلوب", 400));
   if (!items || items.length === 0) return next(new ApiError("يجب إضافة بند واحد على الأقل", 400));
@@ -20,6 +20,8 @@ export const createPurchaseRequest = asyncHandler(async (req, res, next) => {
     status: "pending",
     items,
     notes,
+    Requesting_party,
+    specialized_engineer
   });
 
   res.status(201).json({ success: true, data: request });

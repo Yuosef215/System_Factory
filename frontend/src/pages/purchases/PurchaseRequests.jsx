@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, Fragment } from "react";
+import { useEffect, useState, useCallback, Fragment, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight, Plus, Search, RefreshCw, Loader2, X,
@@ -12,13 +12,13 @@ import api from "../../api/axios";
 // Helpers
 // ─────────────────────────────────────────────────────────────────
 const STATUS_MAP = {
-  pending:       { label: "انتظار",          color: "text-zinc-400",    bg: "bg-zinc-800 border-zinc-700",            icon: Clock },
-  price_offered: { label: "عرض سعر",         color: "text-blue-400",    bg: "bg-blue-500/10 border-blue-500/20",      icon: FileText },
-  approved:      { label: "موافق عليه",       color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20",icon: CheckCircle2 },
-  rejected:      { label: "مرفوض",            color: "text-red-400",     bg: "bg-red-500/10 border-red-500/20",        icon: XCircle },
-  ordered:       { label: "تم الطلب",         color: "text-purple-400",  bg: "bg-purple-500/10 border-purple-500/20",  icon: ShoppingCart },
-  received:      { label: "تم الاستلام",      color: "text-amber-400",   bg: "bg-amber-500/10 border-amber-500/20",    icon: Package },
-  completed:     { label: "مكتمل",            color: "text-teal-400",    bg: "bg-teal-500/10 border-teal-500/20",      icon: CircleCheck },
+  pending: { label: "انتظار", color: "text-zinc-400", bg: "bg-zinc-800 border-zinc-700", icon: Clock },
+  price_offered: { label: "عرض سعر", color: "text-blue-400", bg: "bg-blue-500/10 border-blue-500/20", icon: FileText },
+  approved: { label: "موافق عليه", color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20", icon: CheckCircle2 },
+  rejected: { label: "مرفوض", color: "text-red-400", bg: "bg-red-500/10 border-red-500/20", icon: XCircle },
+  ordered: { label: "تم الطلب", color: "text-purple-400", bg: "bg-purple-500/10 border-purple-500/20", icon: ShoppingCart },
+  received: { label: "تم الاستلام", color: "text-amber-400", bg: "bg-amber-500/10 border-amber-500/20", icon: Package },
+  completed: { label: "مكتمل", color: "text-teal-400", bg: "bg-teal-500/10 border-teal-500/20", icon: CircleCheck },
 };
 
 function StatusBadge({ status }) {
@@ -71,14 +71,35 @@ const UNITS = ["قطعة", "متر", "كيلو", "لتر", "علبة", "رول",
 
 function CreateRequestModal({ onClose, onSuccess }) {
   const [reportNumber, setReportNumber] = useState("");
-  const [notes, setNotes] = useState("");
-  const [items, setItems] = useState([{ itemType: "manual", description: "", quantity: 1, unit: "قطعة" }]);
+  const [loadingNumber, setLoadingNumber] = useState(true); const [notes, setNotes] = useState("");
+  const [items, setItems] = useState([{ itemType: "manual", description: "", quantity: 1, unit: "قطعة",Requesting_party: "", specialized_engineer: ""}]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const addItem = () => setItems((p) => [...p, { itemType: "manual", description: "", quantity: 1, unit: "قطعة" }]);
   const removeItem = (i) => setItems((p) => p.filter((_, idx) => idx !== i));
   const updateItem = (i, field, value) => setItems((p) => p.map((item, idx) => idx === i ? { ...item, [field]: value } : item));
+
+
+  // توليد الرقم أوتوماتيك لما الـ modal يفتح
+  useEffect(() => {
+    const generateNumber = async () => {
+      try {
+        const res = await api.get("/purchase-requests/");
+        const count = res.data.count || res.data.data?.length || 0;
+        const year = new Date().getFullYear();
+        const seq = String(count + 1).padStart(4, "0");
+        setReportNumber(`PR-${year}-${seq}`);
+      } catch {
+        // لو فشل — يولد بالوقت
+        const now = new Date();
+        setReportNumber(`PR-${now.getFullYear()}-${now.getTime().toString().slice(-4)}`);
+      } finally {
+        setLoadingNumber(false);
+      }
+    };
+    generateNumber();
+  }, []);
 
   const submit = async () => {
     setError("");
@@ -101,10 +122,31 @@ function CreateRequestModal({ onClose, onSuccess }) {
     <Modal title="إنشاء طلب شراء جديد" onClose={onClose}>
       <div className="space-y-5">
         {/* رقم المحضر */}
+        {/* رقم المحضر */}
         <div>
           <label className="text-xs font-medium text-zinc-400 mb-1.5 block">رقم المحضر</label>
-          <input value={reportNumber} onChange={(e) => setReportNumber(e.target.value)}
-            placeholder="مثال: PR-2024-001" className={inputCls} />
+          {loadingNumber ? (
+            <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5">
+              <Loader2 size={14} className="animate-spin text-zinc-500" />
+              <span className="text-zinc-500 text-sm">جاري التوليد...</span>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5">
+              <span className="font-mono font-bold text-orange-400 text-sm">{reportNumber}</span>
+              <span className="text-xs text-zinc-600">تلقائي</span>
+            </div>
+          )}
+        </div>
+
+        <div className="flex gap-3 justify-center">
+          <div>
+          <label className="text-xs text-zinc-500 mb-1 block">الجهة الطالبه</label>
+          <input placeholder="مثال: قسم الميكانيكا" onChange={(e) => updateItem(i, "Requesting_party", e.target.value)} type="text" className={inputCls} />
+        </div>
+        <div>
+          <label className="text-xs text-zinc-500 mb-1 block">المهندس المختص</label>
+          <input placeholder="" onChange={(e) => updateItem(i, "specialized_engineer", e.target.value)} type="text" className={inputCls} />
+        </div>
         </div>
 
         {/* البنود */}
@@ -265,15 +307,15 @@ function DeleteModal({ request, onClose, onSuccess }) {
 // ─────────────────────────────────────────────────────────────────
 export default function PurchaseRequests() {
   const navigate = useNavigate();
-  const [requests, setRequests]     = useState([]);
-  const [loading, setLoading]       = useState(true);
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [search, setSearch]         = useState("");
+  const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [modal, setModal]           = useState(null);
+  const [modal, setModal] = useState(null);
 
   let currentUser = {};
-  try { currentUser = JSON.parse(localStorage.getItem("user") || "{}"); } catch {}
+  try { currentUser = JSON.parse(localStorage.getItem("user") || "{}"); } catch { }
   const canCreate = ["developer", "purchase_manager"].includes(currentUser.role);
   const canDelete = ["developer", "purchase_manager"].includes(currentUser.role);
 
@@ -283,7 +325,7 @@ export default function PurchaseRequests() {
     try {
       const res = await api.get("/purchase-requests/");
       setRequests(res.data.data);
-    } catch {}
+    } catch { }
     finally { setLoading(false); setRefreshing(false); }
   }, []);
 
@@ -297,8 +339,8 @@ export default function PurchaseRequests() {
   });
 
   const stats = {
-    total:    requests.length,
-    pending:  requests.filter((r) => r.status === "pending").length,
+    total: requests.length,
+    pending: requests.filter((r) => r.status === "pending").length,
     approved: requests.filter((r) => r.status === "approved").length,
     completed: requests.filter((r) => r.status === "completed").length,
   };
@@ -353,10 +395,10 @@ export default function PurchaseRequests() {
         {/* Stats */}
         <div className="grid grid-cols-4 gap-4">
           {[
-            { label: "إجمالي الطلبات", value: stats.total,     color: "text-white",       bg: "bg-zinc-800/50" },
-            { label: "انتظار",          value: stats.pending,   color: "text-zinc-400",    bg: "bg-zinc-800/50 border border-zinc-700" },
-            { label: "موافق عليها",     value: stats.approved,  color: "text-emerald-400", bg: "bg-emerald-500/10 border border-emerald-500/20" },
-            { label: "مكتملة",          value: stats.completed, color: "text-teal-400",    bg: "bg-teal-500/10 border border-teal-500/20" },
+            { label: "إجمالي الطلبات", value: stats.total, color: "text-white", bg: "bg-zinc-800/50" },
+            { label: "انتظار", value: stats.pending, color: "text-zinc-400", bg: "bg-zinc-800/50 border border-zinc-700" },
+            { label: "موافق عليها", value: stats.approved, color: "text-emerald-400", bg: "bg-emerald-500/10 border border-emerald-500/20" },
+            { label: "مكتملة", value: stats.completed, color: "text-teal-400", bg: "bg-teal-500/10 border border-teal-500/20" },
           ].map((s) => (
             <div key={s.label} className={`rounded-2xl px-5 py-4 ${s.bg}`}>
               <p className="text-xs text-zinc-500 mb-1">{s.label}</p>
@@ -406,6 +448,8 @@ export default function PurchaseRequests() {
                 <tr className="bg-zinc-900/80 text-zinc-500 text-xs border-b border-zinc-800">
                   <th className="text-right py-3.5 px-5 font-medium">رقم المحضر</th>
                   <th className="text-right py-3.5 px-4 font-medium">الطالب</th>
+                  <th className="text-right py-3.5 px-4 font-medium">المهندس المختص</th>
+                  <th className="text-right py-3.5 px-4 font-medium">الجهة الطالبه</th>
                   <th className="text-right py-3.5 px-4 font-medium">عدد البنود</th>
                   <th className="text-right py-3.5 px-4 font-medium">الحالة</th>
                   <th className="text-right py-3.5 px-4 font-medium">التاريخ</th>
@@ -419,6 +463,8 @@ export default function PurchaseRequests() {
                       <span className="font-mono font-bold text-orange-400">{r.reportNumber}</span>
                     </td>
                     <td className="py-3.5 px-4 text-zinc-300">{r.requestedBy}</td>
+                    <td className="py-3.5 px-4 text-zinc-300">{r.specialized_engineer}</td>
+                    <td className="py-3.5 px-4 text-zinc-300">{r.Requesting_party}</td>
                     <td className="py-3.5 px-4">
                       <span className="text-xs bg-zinc-800 border border-zinc-700 text-zinc-400 px-2 py-1 rounded-lg">
                         {r.items?.length} بند
@@ -454,7 +500,7 @@ export default function PurchaseRequests() {
 
       {/* Modals */}
       {modal?.type === "create" && <CreateRequestModal onClose={() => setModal(null)} onSuccess={() => fetchRequests(true)} />}
-      {modal?.type === "view"   && <ViewRequestModal request={modal.request} onClose={() => setModal(null)} />}
+      {modal?.type === "view" && <ViewRequestModal request={modal.request} onClose={() => setModal(null)} />}
       {modal?.type === "delete" && <DeleteModal request={modal.request} onClose={() => setModal(null)} onSuccess={() => fetchRequests(true)} />}
     </div>
   );
