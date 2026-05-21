@@ -72,7 +72,7 @@ const UNITS = ["قطعة", "متر", "كيلو", "لتر", "علبة", "رول",
 function CreateRequestModal({ onClose, onSuccess }) {
   const [reportNumber, setReportNumber] = useState("");
   const [loadingNumber, setLoadingNumber] = useState(true); const [notes, setNotes] = useState("");
-  const [items, setItems] = useState([{ itemType: "manual", description: "", quantity: 1, unit: "قطعة",Requesting_party: "", specialized_engineer: ""}]);
+  const [items, setItems] = useState([{ itemType: "manual", description: "", quantity: 1, unit: "قطعة", Requesting_party: "", specialized_engineer: "" }]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -108,7 +108,7 @@ function CreateRequestModal({ onClose, onSuccess }) {
     if (items.some((i) => i.quantity < 1)) return setError("الكمية يجب أن تكون 1 على الأقل");
     try {
       setLoading(true);
-      await api.post("/purchase-requests/create", { reportNumber, items, notes });
+      await api.post("/purchase-requests/create", { reportNumber, items, notes, specialized_engineer });
       onSuccess();
       onClose();
     } catch (err) {
@@ -138,16 +138,7 @@ function CreateRequestModal({ onClose, onSuccess }) {
           )}
         </div>
 
-        <div className="flex gap-3 justify-center">
-          <div>
-          <label className="text-xs text-zinc-500 mb-1 block">الجهة الطالبه</label>
-          <input placeholder="مثال: قسم الميكانيكا" onChange={(e) => updateItem(i, "Requesting_party", e.target.value)} type="text" className={inputCls} />
-        </div>
-        <div>
-          <label className="text-xs text-zinc-500 mb-1 block">المهندس المختص</label>
-          <input placeholder="" onChange={(e) => updateItem(i, "specialized_engineer", e.target.value)} type="text" className={inputCls} />
-        </div>
-        </div>
+
 
         {/* البنود */}
         <div>
@@ -161,6 +152,16 @@ function CreateRequestModal({ onClose, onSuccess }) {
           <div className="space-y-3">
             {items.map((item, i) => (
               <div key={i} className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 space-y-3">
+                <div className="flex gap-3 justify-center">
+                  <div>
+                    <label className="text-xs text-zinc-500 mb-1 block">الجهة الطالبه</label>
+                    <input placeholder="مثال: قسم الميكانيكا" onChange={(e) => updateItem(i, "Requesting_party", e.target.value)} type="text" className={inputCls} />
+                  </div>
+                  <div>
+                    <label className="text-xs text-zinc-500 mb-1 block">المهندس المختص</label>
+                    <input placeholder="" onChange={(e) => updateItem(i, "specialized_engineer", e.target.value)} type="text" className={inputCls} />
+                  </div>
+                </div>
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-zinc-500">بند {i + 1}</span>
                   {items.length > 1 && (
