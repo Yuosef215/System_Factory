@@ -17,6 +17,7 @@ export const createPurchaseRequest = asyncHandler(async (req, res, next) => {
   const request = await PurchaseRequestModel.create({
     reportNumber,
     requestedBy:req.user.name,
+    specialized_engineer,
     status: "pending",
     items,
     notes,

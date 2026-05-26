@@ -69,12 +69,13 @@ function ServerError({ msg }) {
 // ─────────────────────────────────────────────────────────────────
 const UNITS = ["قطعة", "متر", "كيلو", "لتر", "علبة", "رول", "طقم"];
 
-function CreateRequestModal({ onClose, onSuccess }) {
+function CreateRequestModal({ onClose, onSuccess, currentUser}) {
   const [reportNumber, setReportNumber] = useState("");
   const [loadingNumber, setLoadingNumber] = useState(true); const [notes, setNotes] = useState("");
   const [items, setItems] = useState([{ itemType: "manual", description: "", quantity: 1, unit: "قطعة", Requesting_party: "", specialized_engineer: "" }]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [specializedEngineer, setSpecializedEngineer] = useState("");
 
   const addItem = () => setItems((p) => [...p, { itemType: "manual", description: "", quantity: 1, unit: "قطعة" }]);
   const removeItem = (i) => setItems((p) => p.filter((_, idx) => idx !== i));
@@ -108,7 +109,13 @@ function CreateRequestModal({ onClose, onSuccess }) {
     if (items.some((i) => i.quantity < 1)) return setError("الكمية يجب أن تكون 1 على الأقل");
     try {
       setLoading(true);
-      await api.post("/purchase-requests/create", { reportNumber, items, notes, specialized_engineer });
+      await api.post("/purchase-requests/create", {
+        reportNumber,
+        items,
+        notes,
+        specialized_engineer: specializedEngineer,
+        requestedBy: currentUser?.name || "Unknown User",
+      });
       onSuccess();
       onClose();
     } catch (err) {
@@ -159,7 +166,10 @@ function CreateRequestModal({ onClose, onSuccess }) {
                   </div>
                   <div>
                     <label className="text-xs text-zinc-500 mb-1 block">المهندس المختص</label>
-                    <input placeholder="" onChange={(e) => updateItem(i, "specialized_engineer", e.target.value)} type="text" className={inputCls} />
+                    <input value={specializedEngineer}
+                      onChange={(e) => setSpecializedEngineer(e.target.value)}
+                      placeholder="اسم المهندس المختص"
+                      className={inputCls} />
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
@@ -465,7 +475,7 @@ export default function PurchaseRequests() {
                     </td>
                     <td className="py-3.5 px-4 text-zinc-300">{r.requestedBy}</td>
                     <td className="py-3.5 px-4 text-zinc-300">{r.specialized_engineer}</td>
-                    <td className="py-3.5 px-4 text-zinc-300">{r.Requesting_party}</td>
+                    <td className="py-3.5 px-4 text-zinc-300">{r.items?.[0]?.Requesting_party}</td>
                     <td className="py-3.5 px-4">
                       <span className="text-xs bg-zinc-800 border border-zinc-700 text-zinc-400 px-2 py-1 rounded-lg">
                         {r.items?.length} بند
@@ -500,7 +510,15 @@ export default function PurchaseRequests() {
       </div>
 
       {/* Modals */}
-      {modal?.type === "create" && <CreateRequestModal onClose={() => setModal(null)} onSuccess={() => fetchRequests(true)} />}
+      {
+  modal?.type === "create" && (
+    <CreateRequestModal
+      currentUser={currentUser}
+      onClose={() => setModal(null)}
+      onSuccess={() => fetchRequests(true)}
+    />
+  )
+}
       {modal?.type === "view" && <ViewRequestModal request={modal.request} onClose={() => setModal(null)} />}
       {modal?.type === "delete" && <DeleteModal request={modal.request} onClose={() => setModal(null)} onSuccess={() => fetchRequests(true)} />}
     </div>
