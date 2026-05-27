@@ -4,9 +4,10 @@ import {
   ArrowRight, Plus, Search, RefreshCw, Loader2, X,
   AlertTriangle, FileText, ChevronDown, Trash2, Pencil,
   Clock, CheckCircle2, XCircle, ShoppingCart, Package,
-  CircleCheck, Send
+  CircleCheck, Send,Printer
 } from "lucide-react";
 import api from "../../api/axios";
+import { printPurchaseRequest } from "../../utils/printPDF";
 
 // ─────────────────────────────────────────────────────────────────
 // Helpers
@@ -69,7 +70,7 @@ function ServerError({ msg }) {
 // ─────────────────────────────────────────────────────────────────
 const UNITS = ["قطعة", "متر", "كيلو", "لتر", "علبة", "رول", "طقم"];
 
-function CreateRequestModal({ onClose, onSuccess, currentUser}) {
+function CreateRequestModal({ onClose, onSuccess, currentUser }) {
   const [reportNumber, setReportNumber] = useState("");
   const [loadingNumber, setLoadingNumber] = useState(true); const [notes, setNotes] = useState("");
   const [items, setItems] = useState([{ itemType: "manual", description: "", quantity: 1, unit: "قطعة", Requesting_party: "", specialized_engineer: "" }]);
@@ -487,6 +488,12 @@ export default function PurchaseRequests() {
                     </td>
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-1.5 justify-end">
+                        <button
+    onClick={() => printPurchaseRequest(r)}
+    title="طباعة"
+    className="p-1.5 rounded-lg bg-zinc-700/60 text-zinc-400 hover:bg-orange-500/20 hover:text-orange-400 transition">
+    <Printer size={14} />
+  </button>
                         <button onClick={() => setModal({ type: "view", request: r })}
                           title="عرض التفاصيل"
                           className="p-1.5 rounded-lg bg-zinc-700/60 text-zinc-400 hover:bg-zinc-600 hover:text-white transition">
@@ -511,14 +518,14 @@ export default function PurchaseRequests() {
 
       {/* Modals */}
       {
-  modal?.type === "create" && (
-    <CreateRequestModal
-      currentUser={currentUser}
-      onClose={() => setModal(null)}
-      onSuccess={() => fetchRequests(true)}
-    />
-  )
-}
+        modal?.type === "create" && (
+          <CreateRequestModal
+            currentUser={currentUser}
+            onClose={() => setModal(null)}
+            onSuccess={() => fetchRequests(true)}
+          />
+        )
+      }
       {modal?.type === "view" && <ViewRequestModal request={modal.request} onClose={() => setModal(null)} />}
       {modal?.type === "delete" && <DeleteModal request={modal.request} onClose={() => setModal(null)} onSuccess={() => fetchRequests(true)} />}
     </div>

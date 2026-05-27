@@ -12,9 +12,11 @@ import {
   deletePurchaseRequest,
 } from "../../Services/purchases/PurchaseRequestService.js";
 
+import { createPurchaseRequestValidator } from '../../../utils/validators/PurchaseRequestValidator.js'
+
 const router = express.Router();
 
-router.post("/create", protect, allowedTo("developer", "purchase_manager"), createPurchaseRequest);
+router.post("/create", protect,createPurchaseRequestValidator, allowedTo("developer", "purchase_manager"), createPurchaseRequest);
 router.get("/", protect, allowedTo("developer", "purchase_manager", "gm", "ceo", "warehouse_manager"), getAllPurchaseRequests);
 router.get("/:id", protect, allowedTo("developer", "purchase_manager", "gm", "ceo", "warehouse_manager"), getPurchaseRequestById);
 router.patch("/:id/status", protect, allowedTo("developer", "gm", "ceo"), updateRequestStatus);

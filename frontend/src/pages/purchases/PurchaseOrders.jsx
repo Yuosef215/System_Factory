@@ -3,9 +3,10 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowRight, Plus, Search, RefreshCw, Loader2, X,
   AlertTriangle, ShoppingCart, Eye, CheckCircle2,
-  Clock, Package, ChevronUp, Send
+  Clock, Package, ChevronUp, Send,Printer
 } from "lucide-react";
 import api from "../../api/axios";
+import {printPurchaseOrder} from '../../utils/printPDF'
 
 // ─────────────────────────────────────────────────────────────────
 // Helpers
@@ -464,6 +465,12 @@ export default function PurchaseOrders() {
                     <td className="py-3.5 px-4 text-zinc-400 text-xs">{o.confirmedBy}</td>
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-1.5 justify-end">
+                        <button
+    onClick={() => printPurchaseOrder(r)}
+    title="طباعة"
+    className="p-1.5 rounded-lg bg-zinc-700/60 text-zinc-400 hover:bg-orange-500/20 hover:text-orange-400 transition">
+    <Printer size={14} />
+  </button>
                         <button onClick={() => setModal({ type: "view", order: o })}
                           title="عرض التفاصيل"
                           className="p-1.5 rounded-lg bg-zinc-700/60 text-zinc-400 hover:bg-zinc-600 transition">

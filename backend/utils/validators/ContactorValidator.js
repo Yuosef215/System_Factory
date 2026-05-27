@@ -1,4 +1,4 @@
-import { check, body } from "express-validator";
+import { body } from "express-validator";
 import validatorMiddleware from "../../src/Middlewares/validatorMiddleware";
 import ContactorModel from "../../src/models/Electric/ContactorModel";
 
