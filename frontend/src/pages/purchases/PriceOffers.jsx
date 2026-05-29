@@ -6,6 +6,7 @@ import {
   XCircle, Clock, Send, DollarSign, Eye, ThumbsUp, ThumbsDown
 } from "lucide-react";
 import api from "../../api/axios";
+import {printPurchaseOrder} from '../../utils/printPDF.js'
 
 // ─────────────────────────────────────────────────────────────────
 // Helpers
@@ -522,6 +523,12 @@ export default function PriceOffers() {
                       {new Date(o.createdAt).toLocaleDateString("ar-EG", { day: "2-digit", month: "short", year: "numeric" })}
                     </td>
                     <td className="py-3.5 px-4">
+                      <button
+                          onClick={() => printPurchaseOrder(o)}
+                          title="طباعة"
+                          className="p-1.5 rounded-lg bg-zinc-700/60 text-zinc-400 hover:bg-orange-500/20 hover:text-orange-400 transition">
+                          <Printer size={14} />
+                        </button>
                       <button
                         onClick={() => setModal({ type: "review", offer: o })}
                         title={o.status === "pending" && canReview ? "مراجعة والبت" : "عرض التفاصيل"}

@@ -12,6 +12,7 @@ import PurchaseRequests from './pages/purchases/PurchaseRequests';
 import PriceOffers from './pages/purchases/PriceOffers';
 import PurchaseOrders from './pages/purchases/PurchaseOrders';
 import Inspection from './pages/purchases/Inspection'
+import Chat from "./pages/Chat/Chat";
 
 
 function App() {
@@ -48,6 +49,7 @@ function App() {
     { path: "/purchases/offers", element: <PriceOffers /> },
     { path: "/purchases/orders",     element: <PurchaseOrders /> },
     { path: "/purchases/inspection", element: <Inspection /> },
+    { path: "/chat", element: <Chat /> },
 
   ])
 

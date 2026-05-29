@@ -4,6 +4,7 @@ dotenv.config();
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
+import fs from "fs";
 import connectDB from "./src/Database/dbConnection.js";
 import globalErrorHandler from "./src/Middlewares/errorMiddleware.js";
 import ballBearingRoute from "./src/Routes/Mechanical/ballBearingRoute.js";
@@ -15,10 +16,14 @@ import purchaseRequestRouter from "./src/Routes/purchases/Purchaseroutes.js";
 import offerRouter from "./src/Routes/purchases/offerRouter.js";
 import orderRouter from "./src/Routes/purchases/orderRouter.js";
 import inspectionRouter from "./src/Routes/purchases/inspectionRouter.js";
+import chatRoutes from "./src/Routes/chatRoutes.js";
 import cors from "cors";
 
 const app = express();
 const httpServer = createServer(app);
+
+// ─── مجلد الملفات ────────────────────────────────────────────────
+if (!fs.existsSync("uploads/chat")) fs.mkdirSync("uploads/chat", { recursive: true });
 
 // ─── Socket.io ───────────────────────────────────────────────────
 export const io = new Server(httpServer, {
@@ -32,10 +37,32 @@ export const io = new Server(httpServer, {
 io.on("connection", (socket) => {
   console.log(`✅ User connected: ${socket.id}`);
 
-  // كل يوزر بيدخل في room باسم الـ role بتاعه
+   socket.on("register_user", (userId) => {
+    socket.join(userId); // كل يوزر بيدخل room باسم الـ ID بتاعه
+    console.log(`👤 User ${userId} registered`);
+  });
+
+  // الموجود — rooms بالـ role
   socket.on("join", (role) => {
     socket.join(role);
     console.log(`👤 ${socket.id} joined room: ${role}`);
+  });
+
+  // ── Chat events ──────────────────────────────────────────────
+  socket.on("join_conversation", (conversationId) => {
+    socket.join(conversationId);
+  });
+
+  socket.on("send_message", (message) => {
+    io.to(message.conversation).emit("receive_message", message);
+  });
+
+  socket.on("typing", ({ conversationId, userName }) => {
+    socket.to(conversationId).emit("typing", userName);
+  });
+
+  socket.on("stop_typing", (conversationId) => {
+    socket.to(conversationId).emit("stop_typing");
   });
 
   socket.on("disconnect", () => {
@@ -50,6 +77,7 @@ app.use(cors({
   optionsSuccessStatus: 200,
   credentials: true,
 }));
+app.use("/uploads", express.static("uploads"));
 
 connectDB();
 
@@ -65,6 +93,7 @@ app.use("/api/v1/purchase-requests", purchaseRequestRouter);
 app.use("/api/v1/price-offers",      offerRouter);
 app.use("/api/v1/purchase-orders",   orderRouter);
 app.use("/api/v1/inspection",        inspectionRouter);
+app.use("/api/v1/chat",              chatRoutes);
 
 app.use(globalErrorHandler);
 

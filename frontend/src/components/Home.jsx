@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import { Cog, Zap, LogOut, Factory, ChevronLeft, UserPlus, PackageOpen,ShoppingCart  } from "lucide-react";
+import { Cog, Zap, LogOut, Factory, ChevronLeft, UserPlus, MessageSquare, ShoppingCart, Download } from "lucide-react";
 import { NotificationBell } from "../components/NotificationProvider.jsx";
-
+import { useNotifications } from "../components/NotificationProvider";
+import { useEffect, useState } from "react";
 
 const SECTIONS = [
   {
@@ -19,19 +20,19 @@ const SECTIONS = [
     items: ["بيرينجات", "رولات"],
   },
   {
-  key: "purchases",
-  label: "المشتريات",
-  labelEn: "Purchases",
-  description: "إدارة طلبات الشراء، عروض الأسعار، أوامر الشراء، والفحص والاستلام",
-  icon: ShoppingCart,
-  path: "/purchases/requests",
-  accent: "bg-blue-500",
-  iconBg: "bg-blue-500/10 border-blue-500/20",
-  iconColor: "text-blue-400",
-  hoverBorder: "hover:border-blue-500/40",
-  tag: "bg-blue-500/10 text-blue-400 border border-blue-500/20",
-  items: ["طلبات شراء", "عروض أسعار", "أوامر شراء", "فحص واستلام"],
-},
+    key: "purchases",
+    label: "المشتريات",
+    labelEn: "Purchases",
+    description: "إدارة طلبات الشراء، عروض الأسعار، أوامر الشراء، والفحص والاستلام",
+    icon: ShoppingCart,
+    path: "/purchases/requests",
+    accent: "bg-blue-500",
+    iconBg: "bg-blue-500/10 border-blue-500/20",
+    iconColor: "text-blue-400",
+    hoverBorder: "hover:border-blue-500/40",
+    tag: "bg-blue-500/10 text-blue-400 border border-blue-500/20",
+    items: ["طلبات شراء", "عروض أسعار", "أوامر شراء", "فحص واستلام"],
+  },
   {
     key: "electrical",
     label: "القسم الكهربائي",
@@ -50,9 +51,12 @@ const SECTIONS = [
 
 const CAN_CREATE = ["developer", "gm", "ceo"];
 
+
 export default function Home() {
   const navigate = useNavigate();
-
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [showInstall, setShowInstall] = useState(false);
+  const { unreadCount, chatUnread, clearChatUnread } = useNotifications(); // ← هنا
   let user = {};
   try {
     user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -67,14 +71,36 @@ export default function Home() {
     localStorage.removeItem("user");
     navigate("/");
   };
+  useEffect(() => {
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      setShowInstall(true);
+    });
+  }, []);
+
+  const handleInstall = async () => {
+    if (!installPrompt) return;
+    await installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === "accepted") setShowInstall(false);
+  };
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white" dir="rtl">
 
       {/* Navbar */}
       <header className="border-b border-zinc-800/60 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-20">
+        
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
+            {showInstall && (
+          <button onClick={handleInstall}
+            className="flex items-center gap-2 text-zinc-400 hover:text-orange-400 text-sm transition px-3 py-1.5 rounded-xl hover:bg-orange-500/10 border border-transparent hover:border-orange-500/20">
+            <Download size={15} />
+            تثبيت التطبيق
+          </button>
+        )}
             <div className="w-9 h-9 bg-orange-500/10 border border-orange-500/30 rounded-xl flex items-center justify-center">
               <Factory size={18} className="text-orange-500" />
             </div>
@@ -104,10 +130,26 @@ export default function Home() {
                 <UserPlus size={15} />
                 مستخدم جديد
               </button>
+
             )}
-            <NotificationBell />
-                <button onClick={() => navigate("/users")}>إدارة المستخدمين</button>
             <button
+              onClick={() => { navigate("/chat"); clearChatUnread(); }}
+              className="relative flex items-center gap-2 text-zinc-400 hover:text-orange-400 text-sm transition px-3 py-1.5 rounded-xl hover:bg-orange-500/10 border border-transparent hover:border-orange-500/20"
+            >
+              <MessageSquare size={15} />
+              المحادثات
+              {chatUnread > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-orange-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {chatUnread > 9 ? "9+" : chatUnread}
+                </span>
+              )}
+            </button>
+            <NotificationBell />
+<button
+  onClick={() => navigate("/users")}
+  className="flex items-center gap-2 text-zinc-400 hover:text-orange-400 text-sm transition px-3 py-1.5 rounded-xl hover:bg-orange-500/10 border border-transparent hover:border-orange-500/20">
+  إدارة المستخدمين
+</button>            <button
               onClick={handleLogout}
               className="flex items-center gap-2 text-zinc-400 hover:text-red-400 text-sm transition px-3 py-1.5 rounded-xl hover:bg-red-500/10 border border-transparent hover:border-red-500/20"
             >

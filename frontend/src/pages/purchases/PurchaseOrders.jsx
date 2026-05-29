@@ -3,18 +3,18 @@ import { useNavigate } from "react-router-dom";
 import {
   ArrowRight, Plus, Search, RefreshCw, Loader2, X,
   AlertTriangle, ShoppingCart, Eye, CheckCircle2,
-  Clock, Package, ChevronUp, Send,Printer
+  Clock, Package, ChevronUp, Send, Printer
 } from "lucide-react";
 import api from "../../api/axios";
-import {printPurchaseOrder} from '../../utils/printPDF'
+import { printPurchaseOrder } from '../../utils/printPDF'
 
 // ─────────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────────
 const STATUS_MAP = {
-  pending:  { label: "انتظار",    color: "text-zinc-400",    bg: "bg-zinc-800 border-zinc-700",             icon: Clock },
-  partial:  { label: "جزئي",      color: "text-amber-400",   bg: "bg-amber-500/10 border-amber-500/20",     icon: Package },
-  complete: { label: "مكتمل",     color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20", icon: CheckCircle2 },
+  pending: { label: "انتظار", color: "text-zinc-400", bg: "bg-zinc-800 border-zinc-700", icon: Clock },
+  partial: { label: "جزئي", color: "text-amber-400", bg: "bg-amber-500/10 border-amber-500/20", icon: Package },
+  complete: { label: "مكتمل", color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20", icon: CheckCircle2 },
 };
 
 function StatusBadge({ status }) {
@@ -60,17 +60,17 @@ function ServerError({ msg }) {
 // Create Order Modal
 // ─────────────────────────────────────────────────────────────────
 function CreateOrderModal({ onClose, onSuccess }) {
-  const [offers, setOffers]         = useState([]);
-  const [selected, setSelected]     = useState("");
+  const [offers, setOffers] = useState([]);
+  const [selected, setSelected] = useState("");
   const [offerDetails, setOfferDetails] = useState(null);
-  const [loading, setLoading]       = useState(false);
+  const [loading, setLoading] = useState(false);
   const [loadingOffers, setLoadingOffers] = useState(true);
-  const [error, setError]           = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
     api.get("/price-offers/?status=approved")
       .then((r) => setOffers(r.data.data))
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoadingOffers(false));
   }, []);
 
@@ -176,14 +176,14 @@ function CreateOrderModal({ onClose, onSuccess }) {
 // Confirm Items Modal
 // ─────────────────────────────────────────────────────────────────
 function ConfirmItemsModal({ order, onClose, onSuccess }) {
-  const [items, setItems]   = useState(
+  const [items, setItems] = useState(
     order.items.map((item) => ({
       ...item,
       receivedQty: item.receivedQuantity ?? 0,
     }))
   );
   const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState("");
+  const [error, setError] = useState("");
 
   const updateQty = (i, val) => {
     setItems((prev) => prev.map((item, idx) =>
@@ -313,16 +313,16 @@ function ViewOrderModal({ order, onClose }) {
 // ─────────────────────────────────────────────────────────────────
 export default function PurchaseOrders() {
   const navigate = useNavigate();
-  const [orders, setOrders]         = useState([]);
-  const [loading, setLoading]       = useState(true);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [search, setSearch]         = useState("");
+  const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [modal, setModal]           = useState(null);
+  const [modal, setModal] = useState(null);
 
   let currentUser = {};
-  try { currentUser = JSON.parse(localStorage.getItem("user") || "{}"); } catch {}
-  const canCreate  = ["developer", "purchase_manager"].includes(currentUser.role);
+  try { currentUser = JSON.parse(localStorage.getItem("user") || "{}"); } catch { }
+  const canCreate = ["developer", "purchase_manager"].includes(currentUser.role);
   const canConfirm = ["developer", "purchase_manager", "warehouse_manager"].includes(currentUser.role);
 
   const fetchOrders = useCallback(async (silent = false) => {
@@ -331,7 +331,7 @@ export default function PurchaseOrders() {
     try {
       const res = await api.get("/purchase-orders/");
       setOrders(res.data.data);
-    } catch {}
+    } catch { }
     finally { setLoading(false); setRefreshing(false); }
   }, []);
 
@@ -345,9 +345,9 @@ export default function PurchaseOrders() {
   });
 
   const stats = {
-    total:    orders.length,
-    pending:  orders.filter((o) => o.status === "pending").length,
-    partial:  orders.filter((o) => o.status === "partial").length,
+    total: orders.length,
+    pending: orders.filter((o) => o.status === "pending").length,
+    partial: orders.filter((o) => o.status === "partial").length,
     complete: orders.filter((o) => o.status === "complete").length,
   };
 
@@ -388,10 +388,10 @@ export default function PurchaseOrders() {
         {/* Stats */}
         <div className="grid grid-cols-4 gap-4">
           {[
-            { label: "إجمالي الأوامر", value: stats.total,    color: "text-white",       bg: "bg-zinc-800/50" },
-            { label: "انتظار",          value: stats.pending,  color: "text-zinc-400",    bg: "bg-zinc-800/50 border border-zinc-700" },
-            { label: "استلام جزئي",    value: stats.partial,  color: "text-amber-400",   bg: "bg-amber-500/10 border border-amber-500/20" },
-            { label: "مكتملة",          value: stats.complete, color: "text-emerald-400", bg: "bg-emerald-500/10 border border-emerald-500/20" },
+            { label: "إجمالي الأوامر", value: stats.total, color: "text-white", bg: "bg-zinc-800/50" },
+            { label: "انتظار", value: stats.pending, color: "text-zinc-400", bg: "bg-zinc-800/50 border border-zinc-700" },
+            { label: "استلام جزئي", value: stats.partial, color: "text-amber-400", bg: "bg-amber-500/10 border border-amber-500/20" },
+            { label: "مكتملة", value: stats.complete, color: "text-emerald-400", bg: "bg-emerald-500/10 border border-emerald-500/20" },
           ].map((s) => (
             <div key={s.label} className={`rounded-2xl px-5 py-4 ${s.bg}`}>
               <p className="text-xs text-zinc-500 mb-1">{s.label}</p>
@@ -466,11 +466,11 @@ export default function PurchaseOrders() {
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-1.5 justify-end">
                         <button
-    onClick={() => printPurchaseOrder(r)}
-    title="طباعة"
-    className="p-1.5 rounded-lg bg-zinc-700/60 text-zinc-400 hover:bg-orange-500/20 hover:text-orange-400 transition">
-    <Printer size={14} />
-  </button>
+                          onClick={() => printPurchaseOrder(o)}
+                          title="طباعة"
+                          className="p-1.5 rounded-lg bg-zinc-700/60 text-zinc-400 hover:bg-orange-500/20 hover:text-orange-400 transition">
+                          <Printer size={14} />
+                        </button>
                         <button onClick={() => setModal({ type: "view", order: o })}
                           title="عرض التفاصيل"
                           className="p-1.5 rounded-lg bg-zinc-700/60 text-zinc-400 hover:bg-zinc-600 transition">
@@ -494,8 +494,8 @@ export default function PurchaseOrders() {
       </div>
 
       {/* Modals */}
-      {modal?.type === "create"  && <CreateOrderModal onClose={() => setModal(null)} onSuccess={() => fetchOrders(true)} />}
-      {modal?.type === "view"    && <ViewOrderModal order={modal.order} onClose={() => setModal(null)} />}
+      {modal?.type === "create" && <CreateOrderModal onClose={() => setModal(null)} onSuccess={() => fetchOrders(true)} />}
+      {modal?.type === "view" && <ViewOrderModal order={modal.order} onClose={() => setModal(null)} />}
       {modal?.type === "confirm" && <ConfirmItemsModal order={modal.order} onClose={() => setModal(null)} onSuccess={() => fetchOrders(true)} />}
     </div>
   );

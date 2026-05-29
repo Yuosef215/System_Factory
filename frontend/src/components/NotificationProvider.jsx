@@ -1,5 +1,5 @@
 import { useEffect, useState, createContext, useContext } from "react";
-import { Bell, X, CheckCircle2, XCircle, ShoppingCart, Package, ClipboardCheck, FileText } from "lucide-react";
+import { Bell, X, CheckCircle2, XCircle, ShoppingCart, Package, ClipboardCheck, FileText, MessageSquare } from "lucide-react";
 import socket from "../socket/socket.js";
 
 // ─────────────────────────────────────────────────────────────────
@@ -16,6 +16,7 @@ const TYPE_MAP = {
   new_inspection:       { icon: ClipboardCheck, color: "text-amber-400",   bg: "bg-amber-500/10 border-amber-500/20" },
   inspection_approved:  { icon: CheckCircle2,   color: "text-emerald-400", bg: "bg-emerald-500/10 border-emerald-500/20" },
   added_to_inventory:   { icon: Package,        color: "text-teal-400",    bg: "bg-teal-500/10 border-teal-500/20" },
+  new_message:          { icon: MessageSquare,  color: "text-orange-400",  bg: "bg-orange-500/10 border-orange-500/20" },
 };
 
 // ─────────────────────────────────────────────────────────────────
@@ -115,6 +116,7 @@ export default function NotificationProvider({ children }) {
   const [notifications, setNotifications] = useState([]);
   const [toasts, setToasts]               = useState([]);
   const [unreadCount, setUnreadCount]     = useState(0);
+  const [chatUnread, setChatUnread]       = useState(0);
 
   useEffect(() => {
     let user = {};
@@ -123,31 +125,48 @@ export default function NotificationProvider({ children }) {
 
     socket.connect();
     socket.emit("join", user.role);
+    socket.emit("register_user", user._id);
 
+    // إشعارات النظام فقط
     socket.on("notification", (data) => {
       const id = Date.now().toString();
       const notification = { ...data, id, read: false };
-
-      // أضفه للقائمة
       setNotifications((prev) => [notification, ...prev].slice(0, 50));
       setUnreadCount((prev) => prev + 1);
-
-      // أظهره كـ toast
       setToasts((prev) => [...prev, notification]);
+    });
+
+    // إشعارات الشات فقط
+    socket.on("new_message_notification", (data) => {
+      const id = Date.now().toString();
+      const notification = {
+        ...data,
+        id,
+        read: false,
+        type: "new_message",
+        title: `رسالة من ${data.senderName}`,
+        message: data.text,
+        createdAt: new Date(),
+      };
+      setNotifications((prev) => [notification, ...prev].slice(0, 50));
+      setToasts((prev) => [...prev, notification]);
+      setChatUnread((prev) => prev + 1);
     });
 
     return () => {
       socket.off("notification");
+      socket.off("new_message_notification");
       socket.disconnect();
     };
   }, []);
 
-  const removeToast = (id) => setToasts((prev) => prev.filter((t) => t.id !== id));
-  const markAllRead = () => { setNotifications((prev) => prev.map((n) => ({ ...n, read: true }))); setUnreadCount(0); };
-  const clearAll    = () => { setNotifications([]); setUnreadCount(0); };
+  const removeToast     = (id) => setToasts((prev) => prev.filter((t) => t.id !== id));
+  const markAllRead     = () => { setNotifications((prev) => prev.map((n) => ({ ...n, read: true }))); setUnreadCount(0); };
+  const clearAll        = () => { setNotifications([]); setUnreadCount(0); };
+  const clearChatUnread = () => setChatUnread(0);
 
   return (
-    <NotificationContext.Provider value={{ notifications, unreadCount, markAllRead, clearAll }}>
+    <NotificationContext.Provider value={{ notifications, unreadCount, markAllRead, clearAll, chatUnread, clearChatUnread }}>
       {children}
 
       {/* Toasts */}

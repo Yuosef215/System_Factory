@@ -1,4 +1,5 @@
 import html2pdf from "html2pdf.js";
+import logo from '../../src/assets/logo.png'
 
 function generateAndDownload(htmlContent, filename) {
   const container = document.createElement("div");
@@ -27,10 +28,10 @@ const headerRow = (cells) =>
 // ── Header مشترك ──
 function docHeader(title, reportNumber, by, date) {
   return `
-    <img src={}/>
     <div style="font-family:'Cairo',Arial,sans-serif;direction:rtl;padding:20px;">
       <div style="text-align:center;border-bottom:2px solid #4d5564;padding-bottom:12px;margin-bottom:16px;">
-        <h2 style="margin:0;font-size:20px;color:#111;">Iron Factory System</h2>
+      <img src="${logo}" style="height:70px;object-fit:contain;margin-bottom:8px;" />
+        <h2 style="margin:0;font-size:20px;color:#111;">مصنع طائر الفنيق</h2>
         <h3 style="margin:4px 0 0;font-size:15px;color:#ea580c;">${title}</h3>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:12px;color:#555;margin-bottom:14px;">
