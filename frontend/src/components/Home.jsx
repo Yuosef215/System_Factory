@@ -101,12 +101,12 @@ export default function Home() {
                 تثبيت التطبيق
               </button>
             )}
-            <div className="w-9 h-9 bg-orange-500/10 border border-orange-500/30 rounded-xl flex items-center justify-center">
-              <Factory size={18} className="text-orange-500" />
+            <div className="w-13 h-11 rounded-xl flex items-center justify-center">
+              <img src="/logo.png" alt="" />
             </div>
             <div>
               <h1 className="text-sm font-bold text-white leading-none">Phoenix Steel Bird</h1>
-              <p className="text-[10px] text-zinc-500 mt-0.5">نظام إدارة المخازن والمشتريات</p>
+              <p className="text-[10px] text-zinc-500 mt-0.5">نظام إدارة المخازن والمشتريات والموظفين</p>
             </div>
           </div>
 
@@ -210,9 +210,6 @@ export default function Home() {
             );
           })}
         </div>
-        <p className="text-center text-zinc-700 text-xs mt-16">
-          Iron Factory System — نظام إدارة مخازن المصنع
-        </p>
       </div>
     </div>
   );

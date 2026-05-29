@@ -31,7 +31,8 @@ export const createUserValidator = [
             "electricity_manager",
             "gm",
             "ceo",
-            "viewer"
+            "viewer",
+            "hr_manager"
         ])
         .withMessage('You must select a valid role'),
     body('password')

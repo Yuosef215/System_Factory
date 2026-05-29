@@ -23,7 +23,8 @@ const userSchema = new mongoose.Schema({
             "electricity_manager",
             "gm",
             "ceo",
-            "viewer"
+            "viewer",
+            "hr_manager"
         ],
         default: "viewer",
     },
