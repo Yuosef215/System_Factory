@@ -13,6 +13,11 @@ import PriceOffers from './pages/purchases/PriceOffers';
 import PurchaseOrders from './pages/purchases/PurchaseOrders';
 import Inspection from './pages/purchases/Inspection'
 import Chat from "./pages/Chat/Chat";
+import HR from "./pages/HR/HR";
+import Employees from "./pages/HR/Employees";
+import Attendance from "./pages/HR/Attendance";
+import Leaves from "./pages/HR/Leaves";
+import Salary from "./pages/HR/Salary";
 
 
 function App() {
@@ -50,6 +55,11 @@ function App() {
     { path: "/purchases/orders",     element: <PurchaseOrders /> },
     { path: "/purchases/inspection", element: <Inspection /> },
     { path: "/chat", element: <Chat /> },
+    { path: "/hr", element: <HR/>},
+    { path: "/hr/employees", element: <Employees/>},
+    { path: "/hr/attendance", element: <Attendance/>},
+    { path: "/hr/leaves", element: <Leaves/>},
+    { path: "/hr/salary", element: <Salary/>},
 
   ])
 

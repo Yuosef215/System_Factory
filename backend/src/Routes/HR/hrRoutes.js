@@ -31,7 +31,7 @@ router.use(protect);
 router.get("/employees/stats",        allowedTo(...HR_ROLES), getEmployeeStats);
 router.get("/employees",              allowedTo(...HR_ROLES), getAllEmployees);
 router.get("/employees/:id",          allowedTo(...HR_ROLES), getEmployee);
-router.post("/create",             allowedTo(...HR_ROLES), createEmployee);
+router.post("/employees",             allowedTo(...HR_ROLES), createEmployee);
 router.put("/employees/:id",          allowedTo(...HR_ROLES), updateEmployee);
 router.delete("/employees/:id",       allowedTo(...HR_ROLES), deleteEmployee);
 

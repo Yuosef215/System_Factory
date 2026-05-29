@@ -95,7 +95,7 @@ app.use("/api/v1/price-offers",      offerRouter);
 app.use("/api/v1/purchase-orders",   orderRouter);
 app.use("/api/v1/inspection",        inspectionRouter);
 app.use("/api/v1/chat",              chatRoutes);
-app.use("/api/v1/employees",              hrRoutes);
+app.use("/api/v1/hr",              hrRoutes);
 
 app.use(globalErrorHandler);
 

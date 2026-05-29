@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Cog, Zap, LogOut, Factory, ChevronLeft, UserPlus, MessageSquare, ShoppingCart, Download } from "lucide-react";
+import { Cog, Zap, LogOut, Factory, ChevronLeft, UserPlus, MessageSquare, ShoppingCart, Download,Users} from "lucide-react";
 import { NotificationBell } from "../components/NotificationProvider.jsx";
 import { useNotifications } from "../components/NotificationProvider";
 import { useEffect, useState } from "react";
@@ -47,6 +47,20 @@ const SECTIONS = [
     tag: "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20",
     items: ["كونتاكتورات", "كابلات", "تايمرات", "مفاتيح", "ميترو ستار", "خراطيم"],
   },
+  {
+  key: "hr",
+  label: "الموارد البشرية",
+  labelEn: "HR",
+  description: "إدارة الموظفين والحضور والمرتبات والإجازات",
+  icon: Users,
+  path: "/hr",
+  accent: "bg-pink-500",
+  iconBg: "bg-pink-500/10 border-pink-500/20",
+  iconColor: "text-pink-400",
+  hoverBorder: "hover:border-pink-500/40",
+  tag: "bg-pink-500/10 text-pink-400 border border-pink-500/20",
+  items: ["موظفين", "حضور وغياب", "إجازات", "مرتبات"],
+},
 ];
 
 const CAN_CREATE = ["developer", "gm", "ceo"];
