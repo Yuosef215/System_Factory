@@ -91,22 +91,22 @@ export default function Home() {
 
       {/* Navbar */}
       <header className="border-b border-zinc-800/60 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-20">
-        
+
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {showInstall && (
-          <button onClick={handleInstall}
-            className="flex items-center gap-2 text-zinc-400 hover:text-orange-400 text-sm transition px-3 py-1.5 rounded-xl hover:bg-orange-500/10 border border-transparent hover:border-orange-500/20">
-            <Download size={15} />
-            تثبيت التطبيق
-          </button>
-        )}
+              <button onClick={handleInstall}
+                className="flex items-center gap-2 text-zinc-400 hover:text-orange-400 text-sm transition px-3 py-1.5 rounded-xl hover:bg-orange-500/10 border border-transparent hover:border-orange-500/20">
+                <Download size={15} />
+                تثبيت التطبيق
+              </button>
+            )}
             <div className="w-9 h-9 bg-orange-500/10 border border-orange-500/30 rounded-xl flex items-center justify-center">
               <Factory size={18} className="text-orange-500" />
             </div>
             <div>
-              <h1 className="text-sm font-bold text-white leading-none">Iron Factory</h1>
-              <p className="text-[10px] text-zinc-500 mt-0.5">نظام إدارة المخزون</p>
+              <h1 className="text-sm font-bold text-white leading-none">Phoenix Steel Bird</h1>
+              <p className="text-[10px] text-zinc-500 mt-0.5">نظام إدارة المخازن والمشتريات</p>
             </div>
           </div>
 
@@ -145,11 +145,11 @@ export default function Home() {
               )}
             </button>
             <NotificationBell />
-<button
-  onClick={() => navigate("/users")}
-  className="flex items-center gap-2 text-zinc-400 hover:text-orange-400 text-sm transition px-3 py-1.5 rounded-xl hover:bg-orange-500/10 border border-transparent hover:border-orange-500/20">
-  إدارة المستخدمين
-</button>            <button
+            <button
+              onClick={() => navigate("/users")}
+              className="flex items-center gap-2 text-zinc-400 hover:text-orange-400 text-sm transition px-3 py-1.5 rounded-xl hover:bg-orange-500/10 border border-transparent hover:border-orange-500/20">
+              إدارة المستخدمين
+            </button>            <button
               onClick={handleLogout}
               className="flex items-center gap-2 text-zinc-400 hover:text-red-400 text-sm transition px-3 py-1.5 rounded-xl hover:bg-red-500/10 border border-transparent hover:border-red-500/20"
             >
@@ -162,13 +162,11 @@ export default function Home() {
 
       {/* Body */}
       <div className="max-w-6xl mx-auto px-6 pt-14 pb-16">
-        <div className="mb-12">
+        <div className="mb-5  ">
           <span className="text-xs font-semibold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-3 py-1 rounded-full">
             لوحة التحكم الرئيسية
           </span>
-          <p className="text-zinc-500 mt-3 text-sm max-w-md leading-relaxed">
-            اختر القسم الذي تريد إدارته —
-          </p>
+          
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
