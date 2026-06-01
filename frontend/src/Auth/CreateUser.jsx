@@ -15,6 +15,7 @@ const ROLES = [
   { value: "purchase_manager",    label: "مدير مشتريات" },
   { value: "electricity_manager", label: "مدير كهرباء" },
   { value: "viewer",              label: "مشاهد فقط" },
+  { value: "hr_manager",              label: "مدير الموارد البشريه" },
 ];
 
 const inputCls = (hasError) =>

@@ -1,10 +1,11 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 
-const ContactorMovementSchema = new mongoose.Schema({
-    contactor: {
+
+const KeyMovements = new mongoose.Schema({
+    hose: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Contactor",
+        ref: "ElectricalHose",
         required: true
     },
     quantity: {
@@ -13,7 +14,7 @@ const ContactorMovementSchema = new mongoose.Schema({
     },
     process: {
         type: String,
-        enum: ["صرف", "إضافة"],
+        enum: ["صرف", "اضافه"],
         required: true
     },
     reason: {
@@ -34,6 +35,6 @@ const ContactorMovementSchema = new mongoose.Schema({
     }
 }, { timestamps: true, versionKey: false });
 
-const ContactorMovement = mongoose.model("ContactorMovement", ContactorMovementSchema);
+const KeysMonements = mongoose.model("KeyMovements", KeyMovements);
 
-export default ContactorMovement;
+export default KeysMonements;

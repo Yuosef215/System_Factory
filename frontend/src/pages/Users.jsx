@@ -22,6 +22,7 @@ const ROLE_MAP = {
   purchase_manager:    { label: "مدير مشتريات", color: "text-pink-400",    bg: "bg-pink-500/10 border-pink-500/20",       icon: ShoppingCart },
   electricity_manager: { label: "مدير كهرباء",  color: "text-amber-400",   bg: "bg-amber-500/10 border-amber-500/20",     icon: Zap },
   viewer:              { label: "مشاهد",         color: "text-zinc-400",    bg: "bg-zinc-500/10 border-zinc-500/20",       icon: Eye },
+  hr_manager:              { label: "مدير الموارد البشريه",         color: "text-zinc-400",    bg: "bg-zinc-500/10 border-zinc-500/20",       icon: Crown },
 };
 
 function RoleBadge({ role }) {

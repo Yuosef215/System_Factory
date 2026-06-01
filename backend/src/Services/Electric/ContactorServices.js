@@ -1,7 +1,7 @@
 import asyncHandler from "express-async-handler";
 import ApiError from "../../../utils/apiError.js";
-import ContactorModel from "../../Models/Electric/ContactorModel.js";
-import ContactorMovement from "../../Models/Electric/ContactorMovement.js";
+import ContactorModel from "../../models/Electric/ContactorModel.js";
+import ContactorMovement from "../../models/Electric/ContactorMovement.js";
 
 
 
@@ -107,7 +107,7 @@ export const AddStockContactor = asyncHandler(async (req, res, next) => {
         quantity,
         process: "إضافة",
         reason: "إضافة مخزون",
-        createdBy: req.user.name, // ← عرّفناها هن
+        createdBy: req.user.name,
         balanceBefore: contactor.stock - quantity,
         balanceAfter: contactor.stock,
     });

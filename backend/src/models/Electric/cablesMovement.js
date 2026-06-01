@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 
 const cablesMovementSchema = new mongoose.Schema({
-    contactor: {
+    cables: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "cables",
         required: true

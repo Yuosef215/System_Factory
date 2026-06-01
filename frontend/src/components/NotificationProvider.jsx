@@ -19,9 +19,8 @@ const TYPE_MAP = {
   new_message:          { icon: MessageSquare,  color: "text-orange-400",  bg: "bg-orange-500/10 border-orange-500/20" },
 };
 
-// ─────────────────────────────────────────────────────────────────
 // Toast Component
-// ─────────────────────────────────────────────────────────────────
+
 function Toast({ notification, onRemove }) {
   const t = TYPE_MAP[notification.type] || { icon: Bell, color: "text-zinc-400", bg: "bg-zinc-800 border-zinc-700" };
   const Icon = t.icon;
@@ -49,9 +48,8 @@ function Toast({ notification, onRemove }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────
 // Notification Bell + Dropdown
-// ─────────────────────────────────────────────────────────────────
+
 export function NotificationBell() {
   const { notifications, unreadCount, markAllRead, clearAll } = useNotifications();
   const [open, setOpen] = useState(false);

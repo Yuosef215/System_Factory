@@ -85,7 +85,7 @@ export const AddstockCable = asyncHandler(async (req,res,next) => {
     const movement = await cablesMovement.create({
         cables: id,
         quantity,
-        process: "صرف",
+        process: "إضافة",
         reason,
         createdBy: req.user.name,
         balanceBefore: cable.stock - quantity,
@@ -96,7 +96,7 @@ export const AddstockCable = asyncHandler(async (req,res,next) => {
 
 export const getCablesMovements = asyncHandler(async (req, res, next) => {
     const { id } = req.params;
-    const movements = await cablesMovement.find({ contactor: id }).sort({ createdAt: -1 });
+    const movements = await cablesMovement.find({ cables: id }).sort({ createdAt: -1 });
     res.status(200).json({ success: true, count: movements.length, data: movements });
 });
 

@@ -5,7 +5,7 @@ const electricalHoseSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-    Lengths: {
+    lengths: {
         type: Number,
         required: true,
     },
