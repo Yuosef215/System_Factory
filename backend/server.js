@@ -18,6 +18,7 @@ import orderRouter from "./src/Routes/purchases/orderRouter.js";
 import inspectionRouter from "./src/Routes/purchases/inspectionRouter.js";
 import chatRoutes from "./src/Routes/chatRoutes.js";
 import hrRoutes from "./src/Routes/HR/hrRoutes.js";
+import AllActivity from "./src/Routes/AllActivityLog/AllActivityLogRoute.js";
 import cors from "cors";
 
 const app = express();
@@ -96,6 +97,7 @@ app.use("/api/v1/purchase-orders",   orderRouter);
 app.use("/api/v1/inspection",        inspectionRouter);
 app.use("/api/v1/chat",              chatRoutes);
 app.use("/api/v1/hr",              hrRoutes);
+app.use("/api/v1/activity",              AllActivity);
 
 app.use(globalErrorHandler);
 

@@ -4,6 +4,7 @@ import UserModel from "../../models/users/usersModel.js";
 import bcrypt from 'bcryptjs';
 import createToken from "../../../utils/createToken.js";
 import jwt from "jsonwebtoken";
+import ActivityLogModel from "../../models/ActivityLog/ActivityLogModel.js";
 
 
 export const createUser = asynchandler(async (req, res, next) => {
@@ -35,6 +36,11 @@ export const loginUser = asynchandler(async (req, res, next) => {
         return next(new ApiError("Invalid code or password", 401));
     }
     const token = createToken(user._id);
+
+    await ActivityLogModel.create({
+        user: user.name,
+        action: `${user.name} logged in`,
+    });
     res.status(200).json({ message: "Login successful", data: user, token });
 });
 
@@ -94,6 +100,10 @@ export const deleteUser = asynchandler(async (req, res, next) => {
     if (!user) {
         return next(new ApiError("User not found", 404));
     }
+    await ActivityLogModel.create({
+        user: req.user.name,
+        action: `He deleted the ${user.name}`,
+    });
     res.status(200).json({ message: "User deleted successfully" });
 });
 

@@ -19,6 +19,7 @@ import Attendance from "./pages/HR/Attendance";
 import Leaves from "./pages/HR/Leaves";
 import Salary from "./pages/HR/Salary";
 import Cables from "./pages/Electric/Cables";
+import ActivityLog from "./pages/ActivityLog/ActivityLog";
 
 
 function App() {
@@ -43,7 +44,8 @@ function App() {
     { path: "/hr/attendance", element: <Attendance /> },
     { path: "/hr/leaves", element: <Leaves /> },
     { path: "/hr/salary", element: <Salary /> },
-    { path: "/electrical/cables", element: <Cables /> }
+    { path: "/electrical/cables", element: <Cables /> },
+    { path: "/activity-log", element: <ActivityLog /> }
 
   ])
 

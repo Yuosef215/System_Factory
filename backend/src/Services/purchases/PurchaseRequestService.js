@@ -2,6 +2,7 @@ import asyncHandler from "express-async-handler";
 import ApiError from "../../../utils/apiError.js";
 import PurchaseRequestModel from "../../models/purchases/PurchaseRequest.js";
 import { io } from "../../../server.js";
+import ActivityLogModel from "../../models/ActivityLog/ActivityLogModel.js";
 
 
 // ─── إنشاء طلب شراء جديد ───────────────────────────────────────────
@@ -16,13 +17,18 @@ export const createPurchaseRequest = asyncHandler(async (req, res, next) => {
 
   const request = await PurchaseRequestModel.create({
     reportNumber,
-    requestedBy:req.user.name,
+    requestedBy: req.user.name,
     specialized_engineer,
     status: "pending",
     items,
     notes,
     Requesting_party,
-    specialized_engineer
+  });
+
+  await ActivityLogModel.create({
+    user: req.user.name,
+    action: `He created a purchase order for ${request.specialized_engineer} /n The record number is ${request.reportNumber}.`,
+    createdAt: new Date()
   });
 
   res.status(201).json({ success: true, data: request });

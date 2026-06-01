@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Cog, Zap, LogOut, ChevronLeft, UserPlus, MessageSquare, ShoppingCart, Download, Users, Package, TrendingDown, TrendingUp, Clock } from "lucide-react";
+import { Cog, Zap, LogOut, ChevronLeft, UserPlus, MessageSquare,Activity, ShoppingCart, Download, Users, Package, TrendingDown, TrendingUp, Clock } from "lucide-react";
 import { NotificationBell } from "../components/NotificationProvider.jsx";
 import { useNotifications } from "../components/NotificationProvider";
 import { useEffect, useState } from "react";
@@ -92,7 +92,7 @@ const DEPARTMENTS = [
       },
     ],
   },
-  
+
 ];
 
 const CAN_CREATE = ["developer", "gm", "ceo"];
@@ -145,12 +145,12 @@ function SectionCard({ s, onClick }) {
 export default function Home() {
   const navigate = useNavigate();
   const [installPrompt, setInstallPrompt] = useState(null);
-  const [showInstall, setShowInstall]     = useState(false);
+  const [showInstall, setShowInstall] = useState(false);
   const [recentMovements, setRecentMovements] = useState([]);
   const { chatUnread, clearChatUnread } = useNotifications();
 
   let user = {};
-  try { user = JSON.parse(localStorage.getItem("user") || "{}"); } catch {}
+  try { user = JSON.parse(localStorage.getItem("user") || "{}"); } catch { }
 
   const canCreateUser = CAN_CREATE.includes(user?.role);
 
@@ -179,7 +179,7 @@ export default function Home() {
           ...rollRes.data.data.map((m) => ({ ...m, category: "رول" })),
         ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 10);
         setRecentMovements(all);
-      } catch {}
+      } catch { }
     };
     fetchMovements();
   }, []);
@@ -196,8 +196,8 @@ export default function Home() {
 
       {/* Navbar */}
       <header className="border-b border-zinc-800/60 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-20">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="max-w-7xl mx-auto px-1 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-1">
             {showInstall && (
               <button onClick={handleInstall}
                 className="flex items-center gap-2 text-zinc-400 hover:text-orange-400 text-sm transition px-3 py-1.5 rounded-xl hover:bg-orange-500/10 border border-transparent hover:border-orange-500/20">
@@ -243,6 +243,12 @@ export default function Home() {
               className="flex items-center gap-2 text-zinc-400 hover:text-orange-400 text-sm transition px-3 py-1.5 rounded-xl hover:bg-orange-500/10 border border-transparent hover:border-orange-500/20">
               إدارة المستخدمين
             </button>
+            {user?.role === "developer" && (
+              <button onClick={() => navigate("/activity-log")}
+                className="flex items-center gap-2 text-zinc-400 hover:text-orange-400 text-sm transition px-3 py-1.5 rounded-xl hover:bg-orange-500/10 border border-transparent hover:border-orange-500/20">
+                <Activity size={15} /> سجل النشاط
+              </button>
+            )}
             <button onClick={handleLogout}
               className="flex items-center gap-2 text-zinc-400 hover:text-red-400 text-sm transition px-3 py-1.5 rounded-xl hover:bg-red-500/10 border border-transparent hover:border-red-500/20">
               <LogOut size={15} /> تسجيل الخروج
