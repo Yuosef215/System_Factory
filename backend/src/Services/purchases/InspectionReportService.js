@@ -4,6 +4,7 @@ import InspectionReport from "../../models/purchases/InspectionReport.js";
 import PurchaseOrder from "../../models/purchases/PurchaseOrder.js";
 import PurchaseRequestModel from "../../models/purchases/PurchaseRequest.js";
 import { io } from "../../../server.js";
+import ActivityLogModel from "../../models/ActivityLog/ActivityLogModel.js";
 
 
 // ─── إنشاء تقرير فحص واستلام ────────────────────────────────────────
@@ -26,6 +27,12 @@ export const createInspectionReport = asyncHandler(async (req, res, next) => {
     status: "pending",
     addedToInventory: false,
   });
+  await ActivityLogModel.create({
+    user: req.user.name,
+    action: "create_inspection_report",
+    createdAt: new Date(),
+  });
+
 
   res.status(201).json({ success: true, data: report });
   io.to("warehouse_manager").to("developer").emit("notification", {
@@ -72,7 +79,11 @@ export const approveInspectionReport = asyncHandler(async (req, res, next) => {
       { status: "completed" }
     );
   }
-
+  await ActivityLogModel.create({
+    user: req.user.name,
+    action: ` approve_inspection_report_${report.reportNumber}`,
+    createdAt: new Date(),
+  });
   res.status(200).json({ success: true, data: report });
   io.to("warehouse_worker").to("warehouse_manager").to("developer").emit("notification", {
   type: "inspection_approved",
@@ -92,11 +103,16 @@ export const markAddedToInventory = asyncHandler(async (req, res, next) => {
 
   report.addedToInventory = true;
   await report.save();
+    await ActivityLogModel.create({
+    user: req.user.name,
+    action: `mark_added_to_inventory_${report.reportNumber}`,
+    createdAt: new Date(),
+  });
 
   res.status(200).json({ success: true, message: "تم تأكيد الإضافة للمخزن", data: report });
 });
 
-// ─── جلب التقارير الجاهزة للإضافة للمخزن ───────────────────────────
+//  جلب التقارير الجاهزة للإضافة للمخزن 
 export const getPendingInventoryAdditions = asyncHandler(async (req, res, next) => {
   const reports = await InspectionReport.find({
     status: "approved",
@@ -106,8 +122,8 @@ export const getPendingInventoryAdditions = asyncHandler(async (req, res, next) 
   io.to("purchase_manager").to("warehouse_manager").to("developer").emit("notification", {
   type: "added_to_inventory",
   title: "🏭 تمت الإضافة للمخزن",
-  message: `تمت إضافة بنود المحضر ${report.reportNumber} للمخزن`,
-  data: { reportNumber: report.reportNumber, id: report._id },
+  message: `تمت إضافة بنود المحضر ${reports.reportNumber} للمخزن`,
+  data: { reportNumber: report.reportNumber, id: reports._id },
   createdAt: new Date(),
 });
 });

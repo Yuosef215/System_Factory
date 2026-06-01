@@ -2,6 +2,7 @@ import asyncHandler from "express-async-handler";
 import RollModel from "../../models/Mechanical/rollModel.js";
 import ApiError from "../../../utils/apiError.js";
 import rollMovement from "../../models/Mechanical/rollMovement.js";
+import ActivityLogModel from "../../models/ActivityLog/ActivityLogModel.js";
 
 
 // @desc    Create a new roll
@@ -17,6 +18,12 @@ export const createRoll = asyncHandler(async (req, res) => {
     diameterRoll,
     stock,
     createdBy: createdById,
+  });
+
+  await ActivityLogModel.create({
+    user: req.user.name,
+    action: `${req.user.name} created roll ${roll.rollCode}`,
+    createdAt: new Date(),
   });
   res.status(201).json(roll);
 });
@@ -58,6 +65,11 @@ export const dispenseRoll = asyncHandler(async (req, res, next) => {
         createdBy: createdBy,
         balanceBefore,
         balanceAfter: roll.stock,
+    });
+    await ActivityLogModel.create({
+        user: req.user.name,
+        action: `${req.user.name} صرف ${quantity} من الـ roll ${roll.rollCode}`,
+        createdAt: new Date(),
     });
     res.status(200).json({ data: roll, movement });
 });
@@ -119,6 +131,12 @@ export const addStockRoll = asyncHandler(async (req, res, next) => {
         createdBy: req.user.name,
         balanceBefore,
         balanceAfter: roll.stock,
+    });
+
+    await ActivityLogModel.create({
+        user: req.user.name,
+        action: `${req.user.name} أضاف ${quantity} إلى الـ roll ${roll.rollCode}`,
+        createdAt: new Date(),
     });
 
     res.status(200).json({ data: roll, movement });

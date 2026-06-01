@@ -2,6 +2,7 @@ import asyncHandler from "express-async-handler";
 import ApiError from "../../../utils/apiError.js";
 import cablesModel from "../../models/Electric/cablesModel.js";
 import cablesMovement from '../../models/Electric/cablesMovement.js';
+import ActivityLogModel from "../../models/ActivityLog/ActivityLogModel.js";
 
 
 
@@ -17,6 +18,11 @@ export const cteateCable = asyncHandler(async (req,res,next) => {
     if(!newCable) {
         return next(new ApiError("Cable not Created!", 400))
     };
+    await ActivityLogModel.create({
+        user: req.user.name,
+        action: `${req.user.name} created cable ${newCable._id}`,
+        createdAt: new Date(),
+    });
     res.status(201).json({ succes:true, data: newCable});
 });
 
@@ -45,6 +51,11 @@ export const updateCable = asyncHandler(async(req,res,next) => {
     if(!cable) {
         return next(new ApiError('Cable not found', 404))
     };
+    await ActivityLogModel.create({
+        user: req.user.name,
+        action: `${req.user.name} updated cable ${cable.details}`,
+        createdAt: new Date(),
+    });
     res.status(200).json({ success:true, data: cable});
 });
 
@@ -69,6 +80,11 @@ export const dispenseCable = asyncHandler( async (req,res,next )=> {
         balanceBefore: cable.stock + quantity,
         balanceAfter: cable.stock,
     });
+    await ActivityLogModel.create({
+        user: req.user.name,
+        action: `${req.user.name} صرف ${quantity} من الـ cable ${cable.details}`,
+        createdAt: new Date(),
+    });
     res.status(200).json({success: true, data: cable});
 });
 
@@ -91,6 +107,12 @@ export const AddstockCable = asyncHandler(async (req,res,next) => {
         balanceBefore: cable.stock - quantity,
         balanceAfter: cable.stock,
     });
+    await ActivityLogModel.create({
+        user: req.user.name,
+        action: `${req.user.name} أضاف ${quantity} إلى الـ cable ${cable.details}`,
+        createdAt: new Date(),
+    });
+
     res.status(200).json({success: true, data: cable});
 });
 

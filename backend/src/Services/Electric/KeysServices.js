@@ -17,6 +17,11 @@ export const cteateKey = asyncHandler(async (req, res, next) => {
     if (!newKey) {
         return next(new ApiError("Key not created!", 400))
     };
+    await ActivityLogModel.create({
+        user: req.user.name,
+        action: `${req.user.name} created key ${newKey._id}`,
+        createdAt: new Date(),
+    });
     res.status(201).json({ success: true, data: newKey });
 });
 
@@ -44,6 +49,11 @@ export const updateKey = asyncHandler(async (req, res, next) => {
     if (!Key) {
         return next(new ApiError("Key not found", 404))
     };
+    await ActivityLogModel.create({
+        user: req.user.name,
+        action: `${req.user.name} updated key ${Key._id}`,
+        createdAt: new Date(),
+    });
     res.status(200).json({ success: true, data: Key });
 });
 
@@ -59,10 +69,10 @@ export const dispenseKeys = asyncHandler(async (req, res, next) => {
     const { id } = req.params;
     const { quantity, reason } = req.body;
     const Keys = await KeysModel.findById(id);
-    if(!Keys) {
+    if (!Keys) {
         return next(new ApiError(`Keys with id ${id} not found`, 404));
     };
-    if(Keys.stock < quantity) {
+    if (Keys.stock < quantity) {
         return next(new ApiError(`Not enough stock available for Keys with id ${id}`, 400));
     };
     Keys.stock -= quantity;
@@ -75,6 +85,11 @@ export const dispenseKeys = asyncHandler(async (req, res, next) => {
         createdBy: req.user.name, // ← عرّفناها هن
         balanceBefore: Keys.stock + quantity,
         balanceAfter: Keys.stock,
+    });
+    await ActivityLogModel.create({
+        user: req.user.name,
+        action: `${req.user.name} صرف ${quantity} من الـ key ${Keys._id}`,
+        createdAt: new Date(),
     });
     res.status(200).json({ success: true, data: Keys });
 });
@@ -107,6 +122,11 @@ export const AddStockKeys = asyncHandler(async (req, res, next) => {
         createdBy: req.user.name,
         balanceBefore: Keys.stock - quantity,
         balanceAfter: Keys.stock,
+    });
+    await ActivityLogModel.create({
+        user: req.user.name,
+        action: `${req.user.name} أضاف ${quantity} إلى الـ key ${Keys._id}`,
+        createdAt: new Date(),
     });
     res.status(200).json({ success: true, data: Keys, movement });
 });

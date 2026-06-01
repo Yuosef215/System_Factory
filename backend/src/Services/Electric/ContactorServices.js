@@ -2,6 +2,7 @@ import asyncHandler from "express-async-handler";
 import ApiError from "../../../utils/apiError.js";
 import ContactorModel from "../../models/Electric/ContactorModel.js";
 import ContactorMovement from "../../models/Electric/ContactorMovement.js";
+import ActivityLogModel from "../../models/ActivityLog/ActivityLogModel.js";
 
 
 
@@ -19,6 +20,11 @@ export const ctreateContactor = asyncHandler(async (req, res, next) => {
     if (!newContactor) {
         return next(new ApiError("Contactor not created", 400));
     };
+    await ActivityLogModel.create({
+        user: req.user.name,
+        action: `${req.user.name} created contactor ${newContactor._id}`,
+        createdAt: new Date(),
+    });
     res.status(201).json({ success: true, data: newContactor });
 });
 
@@ -47,6 +53,11 @@ export const updateContactor = asyncHandler(async (req, res, next) => {
     if (!contactor) {
         return next(new ApiError("Contactor not found", 404));
     }
+    await ActivityLogModel.create({
+        user: req.user.name,
+        action: `${req.user.name} updated contactor ${contactor._id}`,
+        createdAt: new Date(),
+    });
     res.status(200).json({ success: true, data: contactor });
 });
 
@@ -55,6 +66,11 @@ export const deleteContactor = asyncHandler(async (req, res, next) => {
     if (!contactor) {
         return next(new ApiError("Contactor not found", 404));
     }
+    await ActivityLogModel.create({
+        user: req.user.name,
+        action: `${req.user.name} deleted contactor ${contactor._id}`,
+        createdAt: new Date(),
+    });
     res.status(200).json({ success: true, data: contactor });
 });
 
@@ -78,6 +94,11 @@ export const dispenseContactor = asyncHandler(async (req, res, next) => {
         createdBy: req.user.name, // ← عرّفناها هن
         balanceBefore: contactor.stock + quantity,
         balanceAfter: contactor.stock,
+    });
+    await ActivityLogModel.create({
+        user: req.user.name,
+        action: `${req.user.name} صرف ${quantity} من الـ contactor ${contactor._id}`,
+        createdAt: new Date(),
     });
     res.status(200).json({ success: true, data: contactor });
 });
@@ -110,6 +131,11 @@ export const AddStockContactor = asyncHandler(async (req, res, next) => {
         createdBy: req.user.name,
         balanceBefore: contactor.stock - quantity,
         balanceAfter: contactor.stock,
+    });
+    await ActivityLogModel.create({
+        user: req.user.name,
+        action: `${req.user.name} أضاف ${quantity} إلى الـ contactor ${contactor._id}`,
+        createdAt: new Date(),
     });
     res.status(200).json({ success: true, data: contactor, movement });
 });

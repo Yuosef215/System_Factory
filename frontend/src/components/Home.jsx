@@ -222,7 +222,7 @@ export default function Home() {
             {user?.role && (
               <span className="text-xs text-zinc-500 ml-2">The Role {user.role}</span>
             )}
-            {canCreateUser && (
+            {["developer","ceo", "gm"].includes(user?.role) && canCreateUser && (
               <button onClick={() => navigate("/create-user")}
                 className="flex items-center gap-2 text-zinc-400 hover:text-orange-400 text-sm transition px-3 py-1.5 rounded-xl hover:bg-orange-500/10 border border-transparent hover:border-orange-500/20">
                 <UserPlus size={15} /> مستخدم جديد

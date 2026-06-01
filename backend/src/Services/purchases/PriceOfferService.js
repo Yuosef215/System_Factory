@@ -3,6 +3,7 @@ import ApiError from "../../../utils/apiError.js";
 import PriceOffer from "../../models/purchases/priceOffer.js";
 import PurchaseRequestModel from "../../models/purchases/PurchaseRequest.js";
 import { io } from "../../../server.js";
+import ActivityLogModel from "../../models/ActivityLog/ActivityLogModel.js";
 
 
 // ─── إنشاء عرض أسعار ────────────────────────────────────────────────
@@ -32,6 +33,11 @@ export const createPriceOffer = asyncHandler(async (req, res, next) => {
 
   // تحديث حالة الطلب
   await PurchaseRequestModel.findByIdAndUpdate(purchaseRequest, { status: "price_offered" });
+  await ActivityLogModel.create({
+    user: req.user.name,
+    action: ` create_price_offer_${offer.reportNumber}`,
+    createdAt: new Date(),
+  });
 
   res.status(201).json({ success: true, data: offer });
   io.to("gm").to("ceo").to("developer").emit("notification", {
@@ -111,7 +117,7 @@ export const rejectPriceOffer = asyncHandler(async (req, res, next) => {
   res.status(200).json({ success: true, data: offer });
   io.to("purchase_manager").to("developer").emit("notification", {
   type: "offer_rejected",
-  title: "❌ تم رفض عرض الأسعار",
+  title: "تم رفض عرض الأسعار",
   message: `${req.user.name} رفض عرض الأسعار — محضر ${offer.reportNumber}`,
   data: { reportNumber: offer.reportNumber, id: offer._id },
   createdAt: new Date(),

@@ -2,12 +2,19 @@ import asynchandler from "express-async-handler";
 import BallBearingModel from "../../models/Mechanical/ballBearingModel.js";
 import ApiError from "../../../utils/apiError.js";
 import BallBearingMovementModel from "../../models/Mechanical/ballBearingMovement.js";
+import ActivityLogModel from "../../models/ActivityLog/ActivityLogModel.js";
 
 export const createBallBearing = asynchandler(async (req, res, next) => {
     const ballBearing = await BallBearingModel.create(req.body);
     if(!ballBearing) {
         return next(new ApiError(`Failed to create ball bearing`, 400));
     };
+
+    await ActivityLogModel.create({
+        user: req.user.name,
+        action: `${req.user.name} created ball bearing ${ballBearing.code}`,
+        createdAt: new Date(),
+    });
     res.status(201).json({ data: ballBearing });
 });
 
@@ -33,6 +40,11 @@ export const dispenseBallBearing = asynchandler(async (req, res, next) => {
         createdBy: req.user.name,
         balanceBefore,
         balanceAfter: ballBearing.stock,
+    });
+    await ActivityLogModel.create({
+        user: req.user.name,
+        action: `${req.user.name} صرف ${quantity} من البيرينج ${ballBearing.code} بسبب ${reason}`,
+        createdAt: new Date(),
     });
     res.status(200).json({ data: ballBearing, movement });
 });
@@ -96,6 +108,12 @@ export const addStockBallBearing = asynchandler(async (req, res, next) => {
         balanceAfter: ballBearing.stock,
     });
 
+    await ActivityLogModel.create({
+        user: req.user.name,
+        action: `${req.user.name} أضاف ${quantity} إلى البيرينج ${ballBearing.code}`,
+        createdAt: new Date(),
+    });
+
     res.status(200).json({ data: ballBearing, movement });
 });
 
@@ -108,12 +126,17 @@ export const deleteBallBearing = asynchandler(async (req, res, next) => {
     }
 
     // منع الحذف لو في حركات عليه
-    const movements = await BallBearingMovementModel.countDocuments({ ballBearing: id });
-    if (movements > 0) {
-        return next(new ApiError(`لا يمكن الحذف، يوجد ${movements} حركة مسجلة على هذا البيرينج`, 400));
-    }
+    // const movements = await BallBearingMovementModel.countDocuments({ ballBearing: id });
+    // if (movements > 0) {
+    //     return next(new ApiError(`لا يمكن الحذف، يوجد ${movements} حركة مسجلة على هذا البيرينج`, 400));
+    // }
 
     await ballBearing.deleteOne();
+    await ActivityLogModel.create({
+        user: req.user.name,
+        action: `${req.user.name} حذف البيرينج ${ballBearing.code}`,
+        createdAt: new Date(),
+    });
 
     res.status(200).json({ message: "تم حذف البيرينج بنجاح" });
 });

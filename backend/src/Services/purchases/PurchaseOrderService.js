@@ -4,6 +4,7 @@ import PurchaseOrder from "../../models/purchases/PurchaseOrder.js";
 import PriceOffer from "../../models/purchases/priceOffer.js";
 import PurchaseRequestModel from "../../models/purchases/PurchaseRequest.js";
 import { io } from "../../../server.js";
+import ActivityLogModel from "../../models/ActivityLog/ActivityLogModel.js";
 
 
 // ─── إنشاء أمر شراء (بعد موافقة المدير) ────────────────────────────
@@ -41,6 +42,12 @@ export const createPurchaseOrder = asyncHandler(async (req, res, next) => {
   // تحديث حالة الطلب
   await PurchaseRequestModel.findByIdAndUpdate(offer.purchaseRequest, { status: "ordered" });
 
+  await ActivityLogModel.create({
+    user: req.user.name,
+    action: ` create_purchase_order_${order.reportNumber}`,
+    createdAt: new Date(),
+  });
+
   res.status(201).json({ success: true, data: order });
   io.to("warehouse_manager").to("warehouse_worker").to("developer").emit("notification", {
   type: "new_purchase_order",
@@ -51,7 +58,7 @@ export const createPurchaseOrder = asyncHandler(async (req, res, next) => {
 });
 });
 
-// ─── جلب كل أوامر الشراء ────────────────────────────────────────────
+//  جلب كل أوامر الشراء 
 export const getAllPurchaseOrders = asyncHandler(async (req, res, next) => {
   const { status } = req.query;
   const filter = status ? { status } : {};
@@ -59,7 +66,7 @@ export const getAllPurchaseOrders = asyncHandler(async (req, res, next) => {
   res.status(200).json({ success: true, count: orders.length, data: orders });
 });
 
-// ─── جلب أمر شراء واحد ──────────────────────────────────────────────
+//  جلب أمر شراء واحد 
 export const getPurchaseOrderById = asyncHandler(async (req, res, next) => {
   const order = await PurchaseOrder.findById(req.params.id)
     .populate("purchaseRequest", "reportNumber requestedBy notes")

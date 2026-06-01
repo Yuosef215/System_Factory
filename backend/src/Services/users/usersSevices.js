@@ -14,11 +14,13 @@ export const createUser = asynchandler(async (req, res, next) => {
         return next(new ApiError("Please enter all required fields", 400));
     }
     const hashPassword = await bcrypt.hash(password, 12);
-
     const user = new UserModel({ name, code, role, password: hashPassword });
     const token = createToken(user._id);
     await user.save();
-
+    await ActivityLogModel.create({
+        user: req.user.name,
+        action: `He created the ${user.name}`,
+    });
     res.status(201).json({message: "User created successfully", data: user, token });
 });
 

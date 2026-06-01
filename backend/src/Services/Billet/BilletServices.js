@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 import ApiError from '../../../utils/apiError';
 import BilletModel from "../../models/Billet/BilletModel";
+import ActivityLogModel from "../../models/ActivityLog/ActivityLogModel.js";
 
 
 
@@ -16,6 +17,12 @@ export const createOrder = asyncHandler(async (req,res,next) =>{
     if (!newBillet) {
         return next(new ApiError('Created not Created!'))
     }
+    await ActivityLogModel.create({
+        user: req.user.name,
+        action: `${req.user.name} created billet ${newBillet._id}`,
+        createdAt: new Date(),
+    });
+
     res.status(200).json({success: true, data: newBillet});
 });
 
