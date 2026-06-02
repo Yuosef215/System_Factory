@@ -110,7 +110,8 @@ export const getContactorMovements = asyncHandler(async (req, res, next) => {
 });
 
 export const getAllContactorMovements = asyncHandler(async (req, res, next) => {
-    const movements = await ContactorMovement.find().sort({ createdAt: -1 });
+    const movements = await ContactorMovement.find({  createdAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) } })
+    .populate("contactor", "companyName ").sort({ createdAt: -1 });
     res.status(200).json({ success: true, count: movements.length, data: movements });
 });
 

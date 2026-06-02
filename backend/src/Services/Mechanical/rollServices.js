@@ -97,8 +97,8 @@ export const getMovementsByDate = asyncHandler(async (req, res, next) => {
     endOfDay.setHours(23, 59, 59, 999);
 
     const movements = await rollMovement
-        .find({ createdAt: { $gte: startOfDay, $lte: endOfDay } })
-        .populate("roll", "code width diameter stock")
+        .find({  createdAt: { $gte: startOfDay, $lte: endOfDay } })
+        .populate("roll", "rollCode companyName")
         .sort({ createdAt: -1 });
 
     res.status(200).json({

@@ -382,7 +382,7 @@ function AllMovementsModal({ onClose }) {
                 {movements.map((m) => (
                   <tr key={m._id} className="border-b border-zinc-800/40 hover:bg-zinc-800/20 transition-colors">
                     <td className="py-2.5 px-4">
-                      <div className="font-semibold text-white">{m.codeRoll || m.roll?.rollCode || "—"}</div>
+                      <div className="font-semibold text-white">{ m.roll?.rollCode}</div>
                     </td>
                     <td className="py-2.5 px-4">
                       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold

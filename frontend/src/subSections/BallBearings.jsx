@@ -113,8 +113,7 @@ function AddBearingModal({ onClose, onSuccess }) {
     }
   };
 
-  return 
-    (
+  return (
       <Modal title="إضافة بيرينج جديد" subtitle="أدخل بيانات البيرينج" onClose={onClose}>
         <div className="space-y-3.5">
           <div className="grid grid-cols-2 gap-3">
@@ -155,7 +154,8 @@ function AddBearingModal({ onClose, onSuccess }) {
         </div>
       </div>
     </Modal>
-    )}
+    );
+}
   
 
 
@@ -165,7 +165,6 @@ function AddBearingModal({ onClose, onSuccess }) {
 function EditBearingModal({ bearing, onClose, onSuccess }) {
   const [form, setForm] = useState({
     brandtype: bearing.brandtype,
-    code: bearing.code,
     innerdiameter: bearing.innerdiameter,
     outerdiameter: bearing.outerdiameter,
     width: bearing.width,
@@ -197,9 +196,7 @@ function EditBearingModal({ bearing, onClose, onSuccess }) {
           <Field label="الماركة">
             <input name="brandtype" value={form.brandtype} onChange={handle} className={inputClass} />
           </Field>
-          <Field label="الكود">
-            <input name="code" value={form.code} onChange={handle} className={inputClass} />
-          </Field>
+          
         </div>
         <div className="grid grid-cols-3 gap-3">
           <Field label="القطر الداخلي">
@@ -575,6 +572,19 @@ export default function BallBearings() {
   const [modal, setModal] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
+  const handlePrintMovements = async (bearing) => {
+  try {
+    const res = await api.get(`/ball-bearing/movements/${bearing._id}`);
+
+    printItemMovements(
+      res.data.data || [],
+      bearing
+    );
+  } catch (err) {
+    console.error(err);
+  }
+};
+
   const fetchBearings = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
     else setRefreshing(true);
@@ -629,7 +639,7 @@ export default function BallBearings() {
             </button>
             <button onClick={() => setModal({ type: "add" })}
               className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition shadow-lg shadow-orange-500/20">
-              <Plus size={16} /> إضافة بيرينج
+              <Plus size={16} /> إضافة رولمان بلي
             </button>
           </div>
         </div>
@@ -725,7 +735,7 @@ export default function BallBearings() {
                             {expanded === b._id ? <ChevronUp size={14} /> : <History size={14} />}
                           </button>
                           {/* Print */}
-                          <button onClick={() => printDailyMovements(movements, date)} title="طباعة"
+                          <button onClick={() => handlePrintMovements(b)} title="طباعة"
                             className="p-1.5 rounded-lg bg-zinc-700/60 text-zinc-400 hover:bg-orange-500/20 hover:text-orange-400 transition">
                             <Printer size={15} />
                           </button>

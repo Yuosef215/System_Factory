@@ -103,7 +103,7 @@ export const addStockBallBearing = asynchandler(async (req, res, next) => {
         quantity,
         process: "إضافة",
         reason: req.body.reason || "purchase",  // ← دايما purchase للإضافة
-        createdBy,
+        createdBy: req.user.name,
         balanceBefore,
         balanceAfter: ballBearing.stock,
     });
