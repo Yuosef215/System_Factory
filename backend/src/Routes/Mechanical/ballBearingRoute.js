@@ -8,7 +8,8 @@ import {
     addStockBallBearing,
     deleteBallBearing,
     getAllBallBearings,
-    getBallBearingById
+    getBallBearingById,
+    updateBallBearing
 
 } from '../../Services/Mechanical/ballBearingService.js';
 
@@ -28,6 +29,8 @@ router.route('/movements')
     .get(protect, allowedTo('developer', 'warehouse_manager', 'viewer', 'ceo', 'gm', 'warehouse_worker'), getMovementsByDate);
 
 // ✅ Dynamic routes بعدين
+router.route('/ball-bearing/:id')
+    .put(protect, allowedTo('developer', 'warehouse_manager'), updateBallBearing);
 router.route('/dispense/:id')
     .patch(protect, allowedTo('developer', 'warehouse_manager', 'warehouse_worker'), dispenseBallBearing);
 

@@ -17,10 +17,6 @@ export const createUser = asynchandler(async (req, res, next) => {
     const user = new UserModel({ name, code, role, password: hashPassword });
     const token = createToken(user._id);
     await user.save();
-    await ActivityLogModel.create({
-        user: req.user.name,
-        action: `He created the ${user.name}`,
-    });
     res.status(201).json({message: "User created successfully", data: user, token });
 });
 
@@ -130,4 +126,13 @@ export const notActiveUser = asynchandler(async (req, res, next) => {
         return next(new ApiError("User not found", 404));
     }
     res.status(200).json({ message: "User deactivated successfully", data: user });
+});
+
+export const activeUser = asynchandler(async (req, res, next) => {
+    const { id } = req.params;
+    const user = await UserModel.findByIdAndUpdate(id, { active: true }, { new: true });
+    if (!user) {
+        return next(new ApiError("User not found", 404));
+    }
+    res.status(200).json({ message: "User activated successfully", data: user });
 });

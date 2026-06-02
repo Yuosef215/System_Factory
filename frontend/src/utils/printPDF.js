@@ -118,7 +118,7 @@ export function printDailyMovements(movements, date) {
   const html = `
     <div style="font-family:'Cairo',Arial,sans-serif;direction:rtl;padding:20px;">
       <div style="text-align:center;border-bottom:2px solid #ea580c;padding-bottom:12px;margin-bottom:16px;">
-        <h2 style="margin:0;font-size:20px;">Iron Factory System</h2>
+        <h2 style="margin:0;font-size:20px;">مصنع طائر الفنيق</h2>
         <h3 style="margin:4px 0 0;color:#ea580c;">الصرف اليومي</h3>
         <p style="margin:4px 0 0;font-size:12px;color:#555;">التاريخ: ${date} — إجمالي الحركات: ${movements.length}</p>
       </div>
@@ -146,7 +146,7 @@ export function printItemMovements(movements, item) {
   const html = `
     <div style="font-family:'Cairo',Arial,sans-serif;direction:rtl;padding:20px;">
       <div style="text-align:center;border-bottom:2px solid #ea580c;padding-bottom:12px;margin-bottom:16px;">
-        <h2 style="margin:0;font-size:20px;">Iron Factory System</h2>
+        <h2 style="margin:0;font-size:20px;">مصنع طائر الفنيق</h2>
         <h3 style="margin:4px 0 0;color:#ea580c;">حركات صنف</h3>
         <p style="margin:4px 0 0;font-size:13px;">${item.brandtype} — ${item.code}</p>
         <p style="margin:2px 0 0;font-size:12px;color:#555;">الرصيد الحالي: ${item.stock}</p>

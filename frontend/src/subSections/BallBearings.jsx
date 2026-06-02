@@ -4,9 +4,10 @@ import {
   ArrowRight, Plus, Minus, PackagePlus, History,
   Search, X, Loader2, ChevronDown, ChevronUp,
   Pencil, Trash2, AlertTriangle, Calendar, Filter,
-  TrendingDown, TrendingUp, Package, RefreshCw
+  TrendingDown, TrendingUp, Package, RefreshCw, Printer,
 } from "lucide-react";
 import api from "../api/axios";
+import {printItemMovements, printDailyMovements} from "../utils/printPDF";
 
 // ─────────────────────────────────────────────────────────────────
 // Utility helpers
@@ -112,13 +113,14 @@ function AddBearingModal({ onClose, onSuccess }) {
     }
   };
 
-  return (
-    <Modal title="إضافة بيرينج جديد" subtitle="أدخل بيانات البيرينج" onClose={onClose}>
-      <div className="space-y-3.5">
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="الماركة" error={errors.brandtype}>
-            <input name="brandtype" value={form.brandtype} onChange={handle} placeholder="SKF, FAG, ..." className={inputClass} />
-          </Field>
+  return 
+    (
+      <Modal title="إضافة بيرينج جديد" subtitle="أدخل بيانات البيرينج" onClose={onClose}>
+        <div className="space-y-3.5">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="الماركة" error={errors.brandtype}>
+              <input name="brandtype" value={form.brandtype} onChange={handle} placeholder="SKF, FAG, ..." className={inputClass} />
+            </Field>
           <Field label="الكود" error={errors.code}>
             <input name="code" value={form.code} onChange={handle} placeholder="6205-2RS" className={inputClass} />
           </Field>
@@ -153,8 +155,9 @@ function AddBearingModal({ onClose, onSuccess }) {
         </div>
       </div>
     </Modal>
-  );
-}
+    )}
+  
+
 
 // ─────────────────────────────────────────────────────────────────
 // Edit Bearing Modal
@@ -506,6 +509,12 @@ function AllMovementsModal({ onClose }) {
         {!loading && movements.length > 0 && (
           <div className="rounded-xl border border-zinc-800 overflow-hidden">
             <div className="flex items-center justify-between px-4 py-2.5 bg-zinc-900 border-b border-zinc-800">
+              <button
+    onClick={() => printDailyMovements(movements, date)}
+    title="طباعة"
+    className="p-1.5 rounded-lg bg-zinc-700/60 text-zinc-400 hover:bg-orange-500/20 hover:text-orange-400 transition">
+    <Printer size={20} />
+  </button>
               <span className="text-xs text-zinc-400">{movements.length} حركة</span>
             </div>
             <table className="w-full text-xs">
@@ -521,7 +530,9 @@ function AllMovementsModal({ onClose }) {
                 </tr>
               </thead>
               <tbody>
+                
                 {movements.map((m) => (
+                  
                   <tr key={m._id} className="border-b border-zinc-800/40 hover:bg-zinc-800/20 transition-colors">
                     <td className="py-2.5 px-4">
                       <div className="font-semibold text-white">{m.ballBearing?.code || "—"}</div>
@@ -594,6 +605,7 @@ export default function BallBearings() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white" dir="rtl">
+      
 
       {/* ── Top Bar ── */}
       <div className="sticky top-0 z-30 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800/60">
@@ -712,10 +724,14 @@ export default function BallBearings() {
                             className={`p-1.5 rounded-lg transition ${expanded === b._id ? "bg-orange-500/20 text-orange-400" : "bg-zinc-700/60 text-zinc-400 hover:bg-zinc-700"}`}>
                             {expanded === b._id ? <ChevronUp size={14} /> : <History size={14} />}
                           </button>
+                          {/* Print */}
+                          <button onClick={() => printDailyMovements(movements, date)} title="طباعة"
+                            className="p-1.5 rounded-lg bg-zinc-700/60 text-zinc-400 hover:bg-orange-500/20 hover:text-orange-400 transition">
+                            <Printer size={15} />
+                          </button>
                         </div>
                       </td>
                     </tr>
-
                     {/* Expanded movements */}
                     {expanded === b._id && (
                       <tr key={`${b._id}-movements`} className="border-t border-zinc-800/30">

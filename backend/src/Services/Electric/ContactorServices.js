@@ -22,7 +22,7 @@ export const ctreateContactor = asyncHandler(async (req, res, next) => {
     };
     await ActivityLogModel.create({
         user: req.user.name,
-        action: `${req.user.name} created contactor ${newContactor._id}`,
+        action: `${req.user.name} created contactor ${newContactor}`,
         createdAt: new Date(),
     });
     res.status(201).json({ success: true, data: newContactor });
@@ -55,7 +55,7 @@ export const updateContactor = asyncHandler(async (req, res, next) => {
     }
     await ActivityLogModel.create({
         user: req.user.name,
-        action: `${req.user.name} updated contactor ${contactor._id}`,
+        action: `${req.user.name} updated contactor ${contactor}`,
         createdAt: new Date(),
     });
     res.status(200).json({ success: true, data: contactor });
@@ -97,7 +97,7 @@ export const dispenseContactor = asyncHandler(async (req, res, next) => {
     });
     await ActivityLogModel.create({
         user: req.user.name,
-        action: `${req.user.name} صرف ${quantity} من الـ contactor ${contactor._id}`,
+        action: `${req.user.name} صرف ${quantity} من الـ contactor ${contactor.companyName} بسبب ${reason}`,
         createdAt: new Date(),
     });
     res.status(200).json({ success: true, data: contactor });

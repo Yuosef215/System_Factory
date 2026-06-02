@@ -125,11 +125,11 @@ export const deleteBallBearing = asynchandler(async (req, res, next) => {
         return next(new ApiError(`Ball bearing with id ${id} not found`, 404));
     }
 
-    // منع الحذف لو في حركات عليه
-    // const movements = await BallBearingMovementModel.countDocuments({ ballBearing: id });
-    // if (movements > 0) {
-    //     return next(new ApiError(`لا يمكن الحذف، يوجد ${movements} حركة مسجلة على هذا البيرينج`, 400));
-    // }
+   // منع الحذف لو في حركات عليه
+    const movements = await BallBearingMovementModel.countDocuments({ ballBearing: id });
+    if (movements > 0) {
+        return next(new ApiError(`لا يمكن الحذف، يوجد ${movements} حركة مسجلة على هذا البيرينج`, 400));
+    }
 
     await ballBearing.deleteOne();
     await ActivityLogModel.create({
@@ -155,4 +155,17 @@ export const getBallBearingById = asynchandler(async (req, res, next) => {
     }
     const movements = await BallBearingMovementModel.find({ ballBearing: id }).sort({ createdAt: -1 });
     res.status(200).json({ data: ballBearing, movements });
+});
+
+export const updateBallBearing = asynchandler(async (req, res, next) => {
+    const ballBearing = await BallBearingModel.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    if (!ballBearing) {
+        return next(new ApiError(`Ball bearing with id ${req.params.id} not found`, 404));
+    }
+    await ActivityLogModel.create({
+        user: req.user.name,
+        action: `${req.user.name} updated ball bearing ${ballBearing.code}`,
+        createdAt: new Date(),
+    });
+    res.status(200).json({ data: ballBearing });
 });

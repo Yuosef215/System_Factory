@@ -17,9 +17,10 @@ import {
 
 
 
+
 const router = express.Router();
 
-router.route('/createUser').post(createUserValidator, createUser);
+router.route('/createUser').post(protect,allowedTo("developer","gm","ceo"), createUser);
 router.route('/login').post(loginValidator, loginUser);
 router.route('/getAllUsers').get(protect, allowedTo("developer","gm","ceo"), getAllUsers);
 router.route('/updateUser/:id').put(protect, allowedTo("developer","gm","ceo"), updateUser);
